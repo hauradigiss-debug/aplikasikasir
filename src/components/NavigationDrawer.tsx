@@ -1,18 +1,24 @@
 import React from 'react';
-import { NavigationTab } from '../types';
+import { NavigationTab, User } from '../types';
 
 interface NavigationProps {
   activeTab: NavigationTab;
   setActiveTab: (tab: NavigationTab) => void;
   onAddProduct: () => void;
   lowStockCount: number;
+  currentUser?: User | null;
+  onLogout?: () => void;
 }
 
 export const NavigationDrawer: React.FC<NavigationProps> = ({
   activeTab,
   setActiveTab,
   lowStockCount,
+  currentUser,
+  onLogout,
 }) => {
+  const [mobileDrawerOpen, setMobileDrawerOpen] = React.useState(false);
+
   const navItems = [
     { id: 'dashboard' as NavigationTab, label: 'Dashboard', icon: 'analytics', badge: 0 },
     { id: 'products' as NavigationTab, label: 'Inventory', icon: 'package_2', badge: lowStockCount },
@@ -21,6 +27,12 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
     { id: 'categories' as NavigationTab, label: 'Category Setup', icon: 'category', badge: 0 },
     { id: 'settings' as NavigationTab, label: 'Settings', icon: 'settings', badge: 0 },
   ];
+
+  const roleLabel = currentUser?.role === 'super_admin'
+    ? 'Super Admin'
+    : currentUser?.role === 'manager'
+    ? 'Manager'
+    : 'Cashier';
 
   return (
     <>
@@ -33,12 +45,12 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
               <span className="material-symbols-outlined text-2xl icon-fill">edit_note</span>
             </div>
             <div>
-              <h2 className="font-semibold text-lg text-[#00236f] tracking-tight leading-tight">
-                Stationery Hub
+              <h2 className="font-bold text-lg text-[#00236f] tracking-tight leading-tight">
+                StationeryPOS
               </h2>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <p className="text-xs font-medium text-[#444651]">Admin Mode</p>
+                <p className="text-xs font-semibold text-[#00236f]">{roleLabel} Mode</p>
               </div>
             </div>
           </div>
@@ -90,24 +102,144 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
           })}
         </nav>
 
-        {/* Quick Shift summary */}
+        {/* Quick Shift / User summary with Logout */}
         <div className="mx-4 mt-auto p-3.5 bg-[#f8f9ff] border border-[#d3e4fe]/80 rounded-xl">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold text-[#00236f] uppercase tracking-wider">Active Register</span>
-            <span className="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold text-[#00236f] uppercase tracking-wider bg-white px-2 py-0.5 rounded border border-[#d3e4fe]">
+              {currentUser?.role === 'super_admin' ? 'SUPER ADMIN' : 'REGISTER POS'}
+            </span>
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Online
+            </span>
           </div>
-          <p className="text-xs text-[#444651]">Cashier: <span className="font-semibold text-[#0b1c30]">Sarah J.</span></p>
-          <p className="text-[11px] text-[#757682] mt-0.5">Shift started: 08:30 AM</p>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-full bg-[#00236f] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+                {currentUser?.fullName?.charAt(0) || 'H'}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-[#0b1c30] truncate">
+                  {currentUser?.fullName || 'Haura'}
+                </p>
+                <p className="text-[11px] text-[#757682] truncate">@{currentUser?.username || 'haura'}</p>
+              </div>
+            </div>
+
+            {onLogout && (
+              <button
+                type="button"
+                onClick={onLogout}
+                title="Keluar / Logout"
+                className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[20px]">logout</span>
+              </button>
+            )}
+          </div>
         </div>
       </aside>
 
+      {/* Mobile Slide-out Drawer */}
+      {mobileDrawerOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileDrawerOpen(false)}
+          />
+          <div className="fixed top-0 bottom-0 left-0 w-4/5 max-w-xs bg-white shadow-2xl p-6 flex flex-col justify-between z-10 animate-in slide-in-from-left duration-200">
+            <div>
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#e5eeff]">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-full bg-[#d3e4fe] flex items-center justify-center text-[#00236f]">
+                    <span className="material-symbols-outlined text-2xl icon-fill">edit_note</span>
+                  </div>
+                  <div>
+                    <h2 className="font-bold text-lg text-[#00236f]">StationeryPOS</h2>
+                    <p className="text-xs text-[#757682]">Terminal #01</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className="p-1 rounded-full text-[#757682] hover:bg-gray-100"
+                >
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <div className="space-y-1">
+                {navItems.map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setMobileDrawerOpen(false);
+                      }}
+                      className={`flex items-center justify-between text-left w-full px-4 py-3 rounded-full transition-all ${
+                        isActive
+                          ? 'bg-[#1e3a8a] text-white font-semibold'
+                          : 'text-[#444651] hover:bg-[#eff4ff]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-xl">{item.icon}</span>
+                        <span className="text-sm font-medium">{item.label}</span>
+                      </div>
+                      {item.badge > 0 && (
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                            isActive ? 'bg-amber-400 text-amber-950' : 'bg-amber-100 text-amber-800'
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="p-3.5 bg-[#f8f9ff] border border-[#d3e4fe] rounded-xl text-xs text-[#444651] space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-[#00236f]">
+                  {currentUser?.role === 'super_admin' ? 'SUPER ADMIN' : 'STAF KASIR'}
+                </span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-sm text-[#0b1c30]">{currentUser?.fullName || 'Haura'}</p>
+                  <p className="text-[11px] text-[#757682]">@{currentUser?.username || 'haura'}</p>
+                </div>
+                {onLogout && (
+                  <button
+                    onClick={() => {
+                      setMobileDrawerOpen(false);
+                      onLogout();
+                    }}
+                    className="px-3 py-1 bg-red-50 text-red-700 font-semibold rounded-lg flex items-center gap-1"
+                  >
+                    <span className="material-symbols-outlined text-sm">logout</span>
+                    Keluar
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mobile Top AppBar */}
-      <header className="md:hidden flex justify-between items-center w-full px-4 h-16 bg-white border-b border-[#c5c5d3]/50 fixed top-0 left-0 z-50 shadow-xs">
+      <header className="md:hidden flex justify-between items-center w-full px-4 h-16 bg-white border-b border-[#c5c5d3]/50 fixed top-0 left-0 z-40 shadow-xs">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setActiveTab(activeTab === 'products' ? 'dashboard' : 'products')}
-            className="p-1 rounded-md text-[#00236f] hover:bg-[#eff4ff]"
-            aria-label="Menu"
+            onClick={() => setMobileDrawerOpen(true)}
+            className="p-1.5 rounded-lg text-[#00236f] hover:bg-[#eff4ff] transition-colors"
+            aria-label="Open Navigation Menu"
           >
             <span className="material-symbols-outlined text-[26px]">menu</span>
           </button>
@@ -117,18 +249,28 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="px-2.5 py-1 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-full flex items-center gap-1"
+              title="Keluar"
+            >
+              <span className="material-symbols-outlined text-[16px]">logout</span>
+              Keluar
+            </button>
+          )}
           <button
             onClick={() => setActiveTab('settings')}
-            className="w-9 h-9 rounded-full overflow-hidden bg-[#d3e4fe] flex items-center justify-center text-[#00236f] hover:opacity-90"
+            className="w-9 h-9 rounded-full overflow-hidden bg-[#d3e4fe] flex items-center justify-center text-[#00236f] hover:opacity-90 transition-opacity font-bold text-xs"
             title="Profile & Settings"
           >
-            <span className="material-symbols-outlined text-lg">person</span>
+            {currentUser?.fullName?.charAt(0) || <span className="material-symbols-outlined text-lg">person</span>}
           </button>
         </div>
       </header>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 px-2 pb-2 bg-white border-t border-[#c5c5d3]/50 shadow-lg">
+      <nav className="md:hidden fixed bottom-0 left-0 w-full z-40 flex justify-around items-center h-20 px-2 pb-2 bg-white border-t border-[#c5c5d3]/50 shadow-lg">
         <button
           onClick={() => setActiveTab('dashboard')}
           className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${

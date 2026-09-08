@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import confetti from 'canvas-confetti';
-import { Product, CartItem, Order, StoreSettings, PaymentMethod, CategoryType } from '../types';
+import { Product, CartItem, Order, StoreSettings, PaymentMethod, CategoryType, User } from '../types';
 import { formatCurrency, generateReceiptNumber, playSound } from '../utils';
 
 interface CashierViewProps {
   products: Product[];
   categories: CategoryType[];
   settings: StoreSettings;
+  currentUser?: User | null;
   onCompleteSale: (order: Order) => void;
   onOpenReceipt: (order: Order) => void;
 }
@@ -15,6 +16,7 @@ export const CashierView: React.FC<CashierViewProps> = ({
   products,
   categories,
   settings,
+  currentUser,
   onCompleteSale,
   onOpenReceipt,
 }) => {
@@ -154,7 +156,7 @@ export const CashierView: React.FC<CashierViewProps> = ({
       paymentMethod,
       amountPaid: tendered,
       change,
-      cashierName: 'Sarah J.',
+      cashierName: currentUser?.fullName || 'Haura',
       customerName: customerName.trim() || 'Walk-in Customer',
       timestamp: new Date().toISOString(),
       status: 'completed',

@@ -1,5 +1,17 @@
 export type CategoryType = 'Notebooks' | 'Writing' | 'Accessories' | 'Art Supplies' | 'Paper & Envelopes' | 'Other';
 
+export type UserRole = 'super_admin' | 'manager' | 'cashier';
+
+export interface User {
+  id: string;
+  username: string;
+  password: string;
+  fullName: string;
+  role: UserRole;
+  avatar?: string;
+  lastLogin?: string;
+}
+
 export interface Product {
   id: string;
   name: string;

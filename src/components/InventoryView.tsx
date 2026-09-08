@@ -351,40 +351,39 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
                 {/* Product Visual Box */}
                 <div
-                  className={`h-32 w-full bg-[#d3e4fe]/40 rounded-lg mb-1 relative overflow-hidden flex items-center justify-center border border-[#c5c5d3]/30 ${
+                  className={`h-36 sm:h-32 w-full bg-[#dbeafe]/70 rounded-xl mb-1 relative overflow-hidden flex items-center justify-center border border-[#c5c5d3]/30 transition-transform ${
                     isOutOfStock ? 'grayscale opacity-60' : ''
                   }`}
                 >
-                  <span className="material-symbols-outlined text-[#4059aa] text-4xl opacity-70 group-hover:scale-110 transition-transform duration-200">
+                  <span className="material-symbols-outlined text-[#1e3a8a] text-4xl opacity-80 group-hover:scale-110 transition-transform duration-200">
                     {product.icon || 'inventory_2'}
                   </span>
-                  <div className="absolute bottom-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/80 text-[#00236f] backdrop-blur-xs">
-                    {product.category}
-                  </div>
                 </div>
 
                 {/* Product Details */}
-                <h3
-                  className={`font-semibold text-base text-[#0b1c30] line-clamp-1 group-hover:text-[#00236f] transition-colors ${
-                    isOutOfStock ? 'text-[#444651]' : ''
-                  }`}
-                  title={product.name}
-                >
-                  {product.name}
-                </h3>
-                <p className="text-xs text-[#757682] font-mono tracking-tight">
-                  SKU: {product.sku}
-                </p>
+                <div className="space-y-0.5">
+                  <h3
+                    className={`font-bold text-base sm:text-lg text-[#0b1c30] line-clamp-1 group-hover:text-[#00236f] transition-colors ${
+                      isOutOfStock ? 'text-[#444651]' : ''
+                    }`}
+                    title={product.name}
+                  >
+                    {product.name}
+                  </h3>
+                  <p className="text-xs text-[#757682] font-mono tracking-tight">
+                    SKU: {product.sku}
+                  </p>
+                </div>
 
                 {/* Price & Unit Count */}
-                <div className="flex justify-between items-end mt-auto pt-2.5 border-t border-[#c5c5d3]/40">
-                  <span className="text-lg font-bold text-[#00236f] leading-none">
+                <div className="flex justify-between items-baseline mt-auto pt-3 border-t border-[#c5c5d3]/40">
+                  <span className="text-xl font-bold text-[#00236f] tracking-tight leading-none">
                     {formatCurrency(product.price, settings.currencySymbol)}
                   </span>
                   <span
-                    className={`text-xs ${
+                    className={`text-sm ${
                       isLowStock
-                        ? 'text-[#b06000] font-bold'
+                        ? 'text-[#ba1a1a] font-bold'
                         : isOutOfStock
                         ? 'text-[#757682] font-medium'
                         : 'text-[#444651] font-medium'

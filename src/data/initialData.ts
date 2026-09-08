@@ -1,4 +1,4 @@
-import { Product, StoreSettings, Order } from '../types';
+import { Product, StoreSettings, Order, User } from '../types';
 
 export const INITIAL_SETTINGS: StoreSettings = {
   storeName: 'StationeryPOS Hub',
@@ -22,7 +22,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     costPrice: 13.50,
     stock: 142,
     minStockAlert: 20,
-    icon: 'book',
+    icon: 'bookmark',
     description: 'Hardcover large notebook with 240 ivory acid-free pages, expandable pocket, and ribbon bookmark.',
     createdAt: '2026-08-01T10:00:00Z',
   },
@@ -35,7 +35,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     costPrice: 1.10,
     stock: 12,
     minStockAlert: 25,
-    icon: 'draw',
+    icon: 'edit',
     description: 'Smooth writing 0.7mm fine point retractable gel ink pen with ergonomic contoured rubber grip.',
     createdAt: '2026-08-02T11:30:00Z',
   },
@@ -230,3 +230,34 @@ export const INITIAL_ORDERS: Order[] = [
     status: 'completed'
   }
 ];
+
+export const INITIAL_USERS: User[] = [
+  {
+    id: 'usr-super-admin',
+    username: 'haura',
+    password: '231',
+    fullName: 'Haura',
+    role: 'super_admin',
+    avatar: 'shield_person',
+    lastLogin: '2026-09-07T20:45:00Z',
+  },
+  {
+    id: 'usr-cashier-1',
+    username: 'sarah',
+    password: '123',
+    fullName: 'Sarah Jenkins',
+    role: 'cashier',
+    avatar: 'badge',
+    lastLogin: '2026-09-07T08:30:00Z',
+  },
+  {
+    id: 'usr-manager-1',
+    username: 'manager',
+    password: '123',
+    fullName: 'Budi Santoso',
+    role: 'manager',
+    avatar: 'manage_accounts',
+    lastLogin: '2026-09-06T17:00:00Z',
+  },
+];
+

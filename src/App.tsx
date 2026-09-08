@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Product, Order, StoreSettings, NavigationTab, CategoryType } from './types';
-import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_SETTINGS } from './data/initialData';
+import { Product, Order, StoreSettings, NavigationTab, CategoryType, User } from './types';
+import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_SETTINGS, INITIAL_USERS } from './data/initialData';
 import { NavigationDrawer } from './components/NavigationDrawer';
 import { InventoryView } from './components/InventoryView';
 import { CashierView } from './components/CashierView';
@@ -11,6 +11,7 @@ import { SettingsView } from './components/SettingsView';
 import { ProductModal } from './components/ProductModal';
 import { StockAdjustModal } from './components/StockAdjustModal';
 import { ReceiptModal } from './components/ReceiptModal';
+import { LoginView } from './components/LoginView';
 
 const DEFAULT_CATEGORIES: CategoryType[] = [
   'Notebooks',
@@ -21,6 +22,38 @@ const DEFAULT_CATEGORIES: CategoryType[] = [
 ];
 
 export default function App() {
+  // Users state for Enterprise RBAC
+  const [users, setUsers] = useState<User[]>(() => {
+    const saved = localStorage.getItem('stationery_pos_users');
+    if (saved) {
+      try {
+        const parsed: User[] = JSON.parse(saved);
+        // Ensure super admin haura is always present with password 231
+        const hasHaura = parsed.some((u) => u.username.toLowerCase() === 'haura');
+        if (!hasHaura) {
+          return [...INITIAL_USERS, ...parsed];
+        }
+        return parsed;
+      } catch {
+        return INITIAL_USERS;
+      }
+    }
+    return INITIAL_USERS;
+  });
+
+  // Authenticated user state
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    const saved = localStorage.getItem('stationery_pos_current_user');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+
   // Load state from localStorage or initial seed
   const [products, setProducts] = useState<Product[]>(() => {
     const saved = localStorage.getItem('stationery_pos_products');
@@ -56,6 +89,18 @@ export default function App() {
 
   // Sync to localStorage
   useEffect(() => {
+    localStorage.setItem('stationery_pos_users', JSON.stringify(users));
+  }, [users]);
+
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('stationery_pos_current_user', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('stationery_pos_current_user');
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
     localStorage.setItem('stationery_pos_products', JSON.stringify(products));
   }, [products]);
 
@@ -70,6 +115,19 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('stationery_pos_categories', JSON.stringify(categories));
   }, [categories]);
+
+  // Auth Handlers
+  const handleLogin = (user: User) => {
+    setCurrentUser(user);
+    // update lastLogin
+    setUsers((prev) =>
+      prev.map((u) => (u.id === user.id ? { ...u, lastLogin: new Date().toISOString() } : u))
+    );
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+  };
 
   // Product CRUD
   const handleOpenAddProduct = () => {
@@ -182,6 +240,11 @@ export default function App() {
 
   const lowStockCount = products.filter((p) => p.stock <= p.minStockAlert).length;
 
+  // If not authenticated, display enterprise login view
+  if (!currentUser) {
+    return <LoginView users={users} onLogin={handleLogin} />;
+  }
+
   return (
     <div className="bg-[#f8f9ff] text-[#0b1c30] min-h-screen flex flex-col md:flex-row pb-20 md:pb-0 pt-16 md:pt-0 selection:bg-[#d3e4fe]">
       {/* Navigation (Sidebar Desktop & Top/Bottom Bar Mobile) */}
@@ -190,6 +253,8 @@ export default function App() {
         setActiveTab={setActiveTab}
         onAddProduct={handleOpenAddProduct}
         lowStockCount={lowStockCount}
+        currentUser={currentUser}
+        onLogout={handleLogout}
       />
 
       {/* Main Content Area */}
@@ -212,6 +277,7 @@ export default function App() {
               products={products}
               categories={categories}
               settings={settings}
+              currentUser={currentUser}
               onCompleteSale={handleCompleteSale}
               onOpenReceipt={handleOpenReceipt}
             />
@@ -249,7 +315,10 @@ export default function App() {
           {activeTab === 'settings' && (
             <SettingsView
               settings={settings}
+              users={users}
+              currentUser={currentUser}
               onSaveSettings={setSettings}
+              onSaveUsers={setUsers}
               onResetData={handleResetData}
             />
           )}
