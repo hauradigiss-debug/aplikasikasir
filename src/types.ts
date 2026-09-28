@@ -1,21 +1,41 @@
 export type CategoryType = 'Notebooks' | 'Writing' | 'Accessories' | 'Art Supplies' | 'Paper & Envelopes' | 'Other';
 
-export type UserRole = 'super_admin' | 'manager' | 'cashier';
+export type UserRole = 'super_admin' | 'manager' | 'cashier' | 'member';
+
+export type MemberTier = 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
+
+export interface Member {
+  id: string;
+  memberCode: string;
+  fullName: string;
+  email?: string;
+  phone?: string;
+  username: string;
+  password?: string;
+  points: number;
+  tier: MemberTier;
+  discountRate: number; // e.g. 0.05 for 5%
+  avatar?: string;
+  createdAt: string;
+  lastLogin?: string;
+}
 
 export interface User {
   id: string;
   username: string;
-  password: string;
+  password?: string;
   fullName: string;
   role: UserRole;
   avatar?: string;
   lastLogin?: string;
+  memberData?: Member;
 }
 
 export interface Product {
   id: string;
   name: string;
   sku: string;
+  barcode?: string;
   category: CategoryType;
   price: number;
   costPrice?: number;
@@ -63,4 +83,4 @@ export interface StoreSettings {
   enableSound: boolean;
 }
 
-export type NavigationTab = 'dashboard' | 'products' | 'cashier' | 'history' | 'categories' | 'settings';
+export type NavigationTab = 'dashboard' | 'products' | 'cashier' | 'history' | 'categories' | 'members' | 'settings';

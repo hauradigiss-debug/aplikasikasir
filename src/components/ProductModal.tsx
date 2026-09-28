@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Product, CategoryType } from '../types';
 import { generateSKU } from '../utils';
+import { BarcodeRenderer } from './BarcodeRenderer';
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -211,6 +212,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 } rounded-lg text-sm text-[#0b1c30] focus:border-[#00236f] outline-none`}
               />
               {errors.sku && <p className="text-xs text-red-600 mt-1">{errors.sku}</p>}
+
+              {sku.trim().length > 2 && (
+                <div className="mt-2 p-2 bg-white rounded-lg border border-slate-200 flex flex-col items-center justify-center">
+                  <BarcodeRenderer value={sku.trim()} height={32} width={1.3} fontSize={9} />
+                </div>
+              )}
             </div>
           </div>
 

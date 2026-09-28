@@ -23,6 +23,7 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
     { id: 'dashboard' as NavigationTab, label: 'Dashboard', icon: 'analytics', badge: 0 },
     { id: 'products' as NavigationTab, label: 'Inventory', icon: 'package_2', badge: lowStockCount },
     { id: 'cashier' as NavigationTab, label: 'Cashier / POS', icon: 'point_of_sale', badge: 0 },
+    { id: 'members' as NavigationTab, label: 'Member Loyalty', icon: 'card_membership', badge: 0 },
     { id: 'history' as NavigationTab, label: 'Sales Report', icon: 'receipt_long', badge: 0 },
     { id: 'categories' as NavigationTab, label: 'Category Setup', icon: 'category', badge: 0 },
     { id: 'settings' as NavigationTab, label: 'Settings', icon: 'settings', badge: 0 },
@@ -138,6 +139,14 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
               </button>
             )}
           </div>
+
+          <div className="mt-2.5 pt-2 border-t border-[#d3e4fe]/60 flex items-center justify-between text-[10px] text-[#5a6072]">
+            <span className="flex items-center gap-1 font-mono">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Turso DB
+            </span>
+            <span className="text-[#00236f] font-semibold truncate max-w-[130px]">mykasirdb (Tokyo)</span>
+          </div>
         </div>
       </aside>
 
@@ -227,6 +236,13 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
                     Keluar
                   </button>
                 )}
+              </div>
+              <div className="pt-2 border-t border-[#d3e4fe]/60 flex items-center justify-between text-[11px] text-[#5a6072]">
+                <span className="flex items-center gap-1 font-mono">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  Turso Cloud
+                </span>
+                <span className="text-[#00236f] font-semibold">mykasirdb-hauradigiss</span>
               </div>
             </div>
           </div>

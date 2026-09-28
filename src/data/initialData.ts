@@ -1,4 +1,4 @@
-import { Product, StoreSettings, Order, User } from '../types';
+import { Product, StoreSettings, Order, User, Member } from '../types';
 
 export const INITIAL_SETTINGS: StoreSettings = {
   storeName: 'StationeryPOS Hub',
@@ -258,6 +258,37 @@ export const INITIAL_USERS: User[] = [
     role: 'manager',
     avatar: 'manage_accounts',
     lastLogin: '2026-09-06T17:00:00Z',
+  },
+];
+
+export const INITIAL_MEMBERS: Member[] = [
+  {
+    id: 'mbr-1',
+    memberCode: 'MBR-8801',
+    fullName: 'Anita Rahmawati',
+    email: 'anita@example.com',
+    phone: '081234567890',
+    username: 'anita',
+    password: '123',
+    points: 250,
+    tier: 'Silver',
+    discountRate: 0.10,
+    avatar: 'face_3',
+    createdAt: '2026-08-15T10:00:00Z',
+  },
+  {
+    id: 'mbr-2',
+    memberCode: 'MBR-8802',
+    fullName: 'Bambang Wijaya',
+    email: 'bambang@example.com',
+    phone: '081987654321',
+    username: 'bambang',
+    password: '123',
+    points: 80,
+    tier: 'Bronze',
+    discountRate: 0.05,
+    avatar: 'face',
+    createdAt: '2026-08-20T14:30:00Z',
   },
 ];
 

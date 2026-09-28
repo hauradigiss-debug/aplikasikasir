@@ -1,6 +1,6 @@
 {
   "name": "StationeryPOS",
-  "description": "Modern Point of Sale (POS) and inventory management system designed for stationery retailers with catalog management, cashier checkout, sales history, and analytics.",
-  "requestFramePermissions": [],
+  "description": "Sistem POS Kasir dan Inventaris Alat Tulis dengan pemindai barcode kamera & hardware USB, pendaftaran member loyalty, sinkronisasi database Turso SQL, dan laporan penjualan.",
+  "requestFramePermissions": ["camera"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

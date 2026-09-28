@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Product, CategoryType, StoreSettings } from '../types';
 import { formatCurrency } from '../utils';
+import { BarcodeSheetModal } from './BarcodeSheetModal';
 
 interface InventoryViewProps {
   products: Product[];
@@ -29,6 +30,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   const [stockFilter, setStockFilter] = useState<StockFilter>('all');
   const [sortBy, setSortBy] = useState<SortOption>('name_asc');
   const [showMoreFilters, setShowMoreFilters] = useState(false);
+  const [isBarcodeSheetOpen, setIsBarcodeSheetOpen] = useState(false);
 
   // Filtered and sorted products
   const filteredProducts = useMemo(() => {
@@ -86,6 +88,15 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={() => setIsBarcodeSheetOpen(true)}
+            className="bg-white hover:bg-slate-50 text-[#00236f] border border-[#c5c5d3] font-medium text-sm h-[44px] px-4 rounded-full active:scale-95 transition-all shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer"
+            title="Lihat dan Cetak Lembar Barcode Produk"
+          >
+            <span className="material-symbols-outlined text-[20px]">barcode_scanner</span>
+            <span className="hidden sm:inline">Lembar Barcode</span>
+          </button>
           <button
             onClick={onAddProduct}
             className="bg-[#00236f] hover:bg-[#1e3a8a] text-white font-medium text-sm h-[44px] px-6 rounded-full active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
@@ -430,6 +441,15 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           )}
         </div>
       )}
+
+      {/* Printable Barcode Sheet Modal */}
+      <BarcodeSheetModal
+        isOpen={isBarcodeSheetOpen}
+        onClose={() => setIsBarcodeSheetOpen(false)}
+        products={products}
+        categories={categories}
+        settings={settings}
+      />
     </div>
   );
 };

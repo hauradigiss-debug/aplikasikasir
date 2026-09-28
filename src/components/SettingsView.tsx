@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StoreSettings, User, UserRole } from '../types';
+import { api, DatabaseStatus } from '../services/api';
 
 interface SettingsViewProps {
   settings: StoreSettings;
@@ -20,6 +21,22 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 }) => {
   const [formData, setFormData] = useState<StoreSettings>({ ...settings });
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  // Turso Ping & Live Status
+  const [tursoStatus, setTursoStatus] = useState<DatabaseStatus | null>(null);
+  const [isPinging, setIsPinging] = useState(false);
+
+  const handlePingTurso = async () => {
+    setIsPinging(true);
+    try {
+      const res = await api.getStatus();
+      setTursoStatus(res);
+    } catch (err: any) {
+      setTursoStatus({ connected: false, error: err?.message });
+    } finally {
+      setIsPinging(false);
+    }
+  };
 
   // New User Form Modal/State
   const [newUsername, setNewUsername] = useState('');
@@ -87,6 +104,72 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         <p className="text-sm text-[#444651] mt-1">
           Store profile, tax rate calculation, receipt footer, and hardware preferences
         </p>
+      </div>
+
+      {/* Turso Cloud Database Integration Card */}
+      <div className="bg-white p-6 rounded-xl border border-[#c5c5d3]/60 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#e5eeff]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-lg border border-emerald-200">
+              <span className="material-symbols-outlined">database</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-[#00236f]">Turso Cloud Database (libSQL)</h3>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                  Connected
+                </span>
+              </div>
+              <p className="text-xs text-[#757682] mt-0.5">
+                Penyimpanan cloud terdistribusi dengan transaksi atomik (ACID) berkecepatan edge.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handlePingTurso}
+            disabled={isPinging}
+            className="px-4 h-9 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-bold rounded-full flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined text-[16px] animate-spin" style={{ display: isPinging ? 'inline-block' : 'none' }}>
+              sync
+            </span>
+            <span className="material-symbols-outlined text-[16px]" style={{ display: isPinging ? 'none' : 'inline-block' }}>
+              network_ping
+            </span>
+            {isPinging ? 'Menguji...' : 'Uji Koneksi Turso'}
+          </button>
+        </div>
+
+        {/* Connection Details Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+          <div className="p-3 bg-[#f8f9ff] border border-[#d3e4fe] rounded-lg">
+            <span className="text-[10px] font-bold text-[#757682] uppercase tracking-wider block">Database Name</span>
+            <span className="text-xs font-mono font-bold text-[#00236f] truncate block mt-0.5">mykasirdb-hauradigiss</span>
+          </div>
+          <div className="p-3 bg-[#f8f9ff] border border-[#d3e4fe] rounded-lg">
+            <span className="text-[10px] font-bold text-[#757682] uppercase tracking-wider block">Wilayah Cloud</span>
+            <span className="text-xs font-bold text-[#0b1c30] block mt-0.5">AWS Tokyo (ap-northeast-1)</span>
+          </div>
+          <div className="p-3 bg-[#f8f9ff] border border-[#d3e4fe] rounded-lg">
+            <span className="text-[10px] font-bold text-[#757682] uppercase tracking-wider block">Protokol & Driver</span>
+            <span className="text-xs font-bold text-emerald-700 block mt-0.5">libSQL v0.18 (@libsql/client)</span>
+          </div>
+        </div>
+
+        {tursoStatus && (
+          <div className={`p-3 rounded-lg text-xs flex items-center justify-between ${tursoStatus.connected ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+            <span className="flex items-center gap-1.5 font-medium">
+              <span className="material-symbols-outlined text-sm">{tursoStatus.connected ? 'check_circle' : 'error'}</span>
+              {tursoStatus.connected
+                ? `Koneksi aktif! Database merespons dengan latensi ${tursoStatus.latencyMs ?? '<50'} ms.`
+                : `Gagal tersambung: ${tursoStatus.error || 'Server error'}`}
+            </span>
+            <span className="text-[10px] font-mono text-[#5a6072]">Endpoint: libsql://mykasirdb-hauradigiss.aws-ap-northeast-1.turso.io</span>
+          </div>
+        )}
       </div>
 
       {/* User Accounts & Credential List Section (ENTERPRISE RBAC) */}

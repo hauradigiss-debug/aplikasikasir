@@ -1,13 +1,16 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { Product, CartItem, Order, StoreSettings, PaymentMethod, CategoryType, User } from '../types';
+import { Product, CartItem, Order, StoreSettings, PaymentMethod, CategoryType, User, Member } from '../types';
 import { formatCurrency, generateReceiptNumber, playSound } from '../utils';
+import { BarcodeScannerModal } from './BarcodeScannerModal';
 
 interface CashierViewProps {
   products: Product[];
   categories: CategoryType[];
   settings: StoreSettings;
   currentUser?: User | null;
+  members?: Member[];
+  onMemberPointEarned?: (memberId: string, pointsEarned: number) => void;
   onCompleteSale: (order: Order) => void;
   onOpenReceipt: (order: Order) => void;
 }
@@ -17,6 +20,8 @@ export const CashierView: React.FC<CashierViewProps> = ({
   categories,
   settings,
   currentUser,
+  members = [],
+  onMemberPointEarned,
   onCompleteSale,
   onOpenReceipt,
 }) => {
@@ -25,10 +30,100 @@ export const CashierView: React.FC<CashierViewProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>('All Items');
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [customerName, setCustomerName] = useState('');
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [isMemberDropdownOpen, setIsMemberDropdownOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [cashTendered, setCashTendered] = useState<number | ''>('');
   const [heldCarts, setHeldCarts] = useState<{ id: string; time: string; items: CartItem[]; customer: string }[]>([]);
+
+  // Barcode Scanning States
+  const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
+  const [scanToast, setScanToast] = useState<{ name: string; sku: string; price: number } | null>(null);
+  const toastTimeoutRef = useRef<any>(null);
+
+  // Global Hardware USB / Bluetooth Barcode Gun Scanner Listener
+  useEffect(() => {
+    let buffer = '';
+    let lastKeyTime = Date.now();
+
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Do not capture if inside a standard input that the user is intentionally typing into,
+      // EXCEPT when keys come in at sub-45ms speed (which is a hardware barcode scanner)
+      const target = e.target as HTMLElement | null;
+      const isTypingField = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+
+      const currentTime = Date.now();
+      const interval = currentTime - lastKeyTime;
+      lastKeyTime = currentTime;
+
+      if (e.key === 'Enter') {
+        // Hardware barcode scanners send an Enter key at the end of the barcode stream
+        if (buffer.length >= 2 && interval < 120) {
+          const scannedCode = buffer.trim();
+          buffer = '';
+
+          // 1. Check if scanned code is a Member Barcode (e.g. MBR-8801)
+          const clean = scannedCode.toLowerCase();
+          const matchedMember = members.find(
+            (m) =>
+              m.memberCode.toLowerCase() === clean ||
+              m.id.toLowerCase() === clean ||
+              (m.phone && m.phone === scannedCode)
+          );
+
+          if (matchedMember) {
+            e.preventDefault();
+            setSelectedMember(matchedMember);
+            setCustomerName(`${matchedMember.fullName} (${matchedMember.memberCode})`);
+            setDiscountPercent(Math.round(matchedMember.discountRate * 100));
+            if (settings.enableSound) playSound('success');
+            if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+            setScanToast({
+              name: `Member VIP: ${matchedMember.fullName} (${matchedMember.tier})`,
+              sku: matchedMember.memberCode,
+              price: 0,
+            });
+            toastTimeoutRef.current = setTimeout(() => setScanToast(null), 3500);
+            return;
+          }
+
+          // 2. Check if scanned code is a Product SKU or Barcode
+          const matched = products.find((p) => {
+            return (
+              (p.sku && p.sku.toLowerCase() === clean) ||
+              (p.barcode && p.barcode.toLowerCase() === clean) ||
+              (p.id && p.id.toLowerCase() === clean)
+            );
+          });
+
+          if (matched) {
+            e.preventDefault();
+            handleAddToCart(matched);
+
+            if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+            setScanToast({ name: matched.name, sku: matched.sku, price: matched.price });
+            toastTimeoutRef.current = setTimeout(() => setScanToast(null), 3500);
+          }
+        } else {
+          buffer = '';
+        }
+      } else if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        // Collect characters if rapid interval (hardware gun) or if user is not in an input
+        if (interval < 60 || !isTypingField) {
+          buffer += e.key;
+        } else {
+          buffer = e.key;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown);
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    };
+  }, [products, settings]);
 
   // Filter products
   const filteredProducts = useMemo(() => {
@@ -165,6 +260,12 @@ export const CashierView: React.FC<CashierViewProps> = ({
     onCompleteSale(newOrder);
     if (settings.enableSound) playSound('success');
 
+    // Award loyalty points to member if attached
+    if (selectedMember && onMemberPointEarned) {
+      const earned = Math.max(1, Math.floor(grandTotal));
+      onMemberPointEarned(selectedMember.id, earned);
+    }
+
     // Confetti celebration
     try {
       confetti({
@@ -179,6 +280,7 @@ export const CashierView: React.FC<CashierViewProps> = ({
     setIsCheckoutOpen(false);
     setCart([]);
     setCustomerName('');
+    setSelectedMember(null);
     setDiscountPercent(0);
     onOpenReceipt(newOrder);
   };
@@ -208,8 +310,8 @@ export const CashierView: React.FC<CashierViewProps> = ({
           )}
         </div>
 
-        {/* Search & Category Pills */}
-        <div className="flex flex-col sm:flex-row gap-2.5 mb-4">
+        {/* Search, Barcode Input & Scanner Button */}
+        <div className="flex flex-col sm:flex-row gap-2.5 mb-3">
           <div className="relative flex-1">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#757682]">
               search
@@ -218,15 +320,49 @@ export const CashierView: React.FC<CashierViewProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search product or type SKU..."
-              className="w-full h-11 pl-10 pr-3.5 bg-white border border-[#c5c5d3] rounded-lg text-sm text-[#0b1c30] focus:border-[#00236f] outline-none placeholder:text-[#757682]"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && searchQuery.trim()) {
+                  const query = searchQuery.trim().toLowerCase();
+                  const exact = products.find(
+                    (p) =>
+                      (p.sku && p.sku.toLowerCase() === query) ||
+                      (p.barcode && p.barcode.toLowerCase() === query) ||
+                      (p.id && p.id.toLowerCase() === query)
+                  );
+                  if (exact) {
+                    e.preventDefault();
+                    handleAddToCart(exact);
+                    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+                    setScanToast({ name: exact.name, sku: exact.sku, price: exact.price });
+                    toastTimeoutRef.current = setTimeout(() => setScanToast(null), 3500);
+                    setSearchQuery('');
+                  }
+                }
+              }}
+              placeholder="Cari nama barang atau ketik / scan SKU barcode (Enter)..."
+              className="w-full h-11 pl-10 pr-3.5 bg-white border border-[#c5c5d3] rounded-xl text-sm text-[#0b1c30] focus:border-[#00236f] focus:ring-1 focus:ring-[#00236f] outline-none placeholder:text-[#757682]"
             />
           </div>
 
-          <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+          {/* Barcode Scanner Launch Button */}
+          <button
+            type="button"
+            onClick={() => setIsBarcodeScannerOpen(true)}
+            className="h-11 px-4 bg-[#00236f] hover:bg-[#1a388b] active:scale-98 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer shrink-0"
+            title="Buka Kamera Barcode Scanner atau Mode USB"
+          >
+            <span className="material-symbols-outlined text-[20px]">barcode_scanner</span>
+            <span>Scan Barcode</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-0.5"></span>
+          </button>
+        </div>
+
+        {/* Category Pills & Hardware Scanner Status */}
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar flex-1">
             <button
               onClick={() => setSelectedCategory('All Items')}
-              className={`whitespace-nowrap px-3.5 h-11 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+              className={`whitespace-nowrap px-3.5 h-9 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
                 selectedCategory === 'All Items'
                   ? 'bg-[#00236f] text-white border-[#00236f]'
                   : 'bg-white text-[#444651] border-[#c5c5d3] hover:bg-[#d3e4fe]'
@@ -238,7 +374,7 @@ export const CashierView: React.FC<CashierViewProps> = ({
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`whitespace-nowrap px-3.5 h-11 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+                className={`whitespace-nowrap px-3.5 h-9 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
                   selectedCategory === cat
                     ? 'bg-[#00236f] text-white border-[#00236f]'
                     : 'bg-white text-[#444651] border-[#c5c5d3] hover:bg-[#d3e4fe]'
@@ -247,6 +383,11 @@ export const CashierView: React.FC<CashierViewProps> = ({
                 {cat}
               </button>
             ))}
+          </div>
+
+          <div className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-600 bg-white px-3 py-1.5 rounded-full border border-slate-200 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            Scanner USB Aktif
           </div>
         </div>
 
@@ -285,7 +426,10 @@ export const CashierView: React.FC<CashierViewProps> = ({
                     <h4 className="font-semibold text-xs text-[#0b1c30] line-clamp-2 leading-tight">
                       {prod.name}
                     </h4>
-                    <p className="text-[10px] text-[#757682] font-mono mt-0.5">{prod.sku}</p>
+                    <div className="flex items-center gap-1 text-[10px] text-[#757682] font-mono mt-0.5">
+                      <span className="material-symbols-outlined text-[12px] text-slate-400">qr_code</span>
+                      <span>{prod.sku}</span>
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#e5eeff] w-full">
@@ -340,6 +484,116 @@ export const CashierView: React.FC<CashierViewProps> = ({
           </div>
         </div>
 
+        {/* Member Loyalty Section */}
+        <div className="px-3.5 py-2 bg-gradient-to-r from-amber-50/70 to-slate-50 border-b border-[#e5eeff] flex flex-col gap-1.5 relative">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-amber-700 text-sm">loyalty</span>
+              <span className="text-[11px] font-bold text-[#0b1c30]">Member Loyalty</span>
+            </div>
+
+            {selectedMember ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedMember(null);
+                  setDiscountPercent(0);
+                  setCustomerName('');
+                }}
+                className="text-[10px] text-red-600 hover:text-red-800 font-semibold cursor-pointer"
+              >
+                Lepas Member
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsMemberDropdownOpen(!isMemberDropdownOpen)}
+                className="text-[11px] font-bold text-[#00236f] hover:underline flex items-center gap-0.5 cursor-pointer"
+              >
+                <span>+ Hubungkan Member</span>
+                <span className="material-symbols-outlined text-xs">arrow_drop_down</span>
+              </button>
+            )}
+          </div>
+
+          {selectedMember ? (
+            <div className="p-2 bg-white rounded-lg border border-amber-200/80 shadow-2xs flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center font-bold text-[10px]">
+                  {selectedMember.tier[0]}
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-[#0b1c30]">{selectedMember.fullName}</span>
+                    <span className="px-1 text-[9px] font-bold rounded bg-amber-100 text-amber-900 uppercase">
+                      {selectedMember.tier}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-[#5a6072] font-mono block">
+                    {selectedMember.memberCode} • Saldo: {selectedMember.points} Pts
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                  {Math.round(selectedMember.discountRate * 100)}% OFF
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="text-[10px] text-[#5a6072]">
+              Scan barcode kartu member atau pilih dari daftar database
+            </div>
+          )}
+
+          {/* Member Dropdown Picker */}
+          {isMemberDropdownOpen && !selectedMember && (
+            <div className="absolute top-full left-2 right-2 mt-1 z-30 bg-white rounded-xl shadow-xl border border-slate-200 p-2 max-h-48 overflow-y-auto">
+              <div className="text-[11px] font-bold text-[#0b1c30] pb-1.5 mb-1 border-b border-slate-100 flex items-center justify-between">
+                <span>Pilih Member Terdaftar</span>
+                <button
+                  type="button"
+                  onClick={() => setIsMemberDropdownOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 text-xs"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {members.length === 0 ? (
+                <p className="text-xs text-slate-400 p-2 text-center">Belum ada member terdaftar.</p>
+              ) : (
+                <div className="space-y-1">
+                  {members.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedMember(m);
+                        setCustomerName(`${m.fullName} (${m.memberCode})`);
+                        setDiscountPercent(Math.round(m.discountRate * 100));
+                        setIsMemberDropdownOpen(false);
+                      }}
+                      className="w-full p-1.5 text-left rounded-lg hover:bg-amber-50/80 transition-colors flex items-center justify-between text-xs cursor-pointer"
+                    >
+                      <div>
+                        <span className="font-semibold text-[#0b1c30] block">{m.fullName}</span>
+                        <span className="text-[10px] text-slate-500 font-mono">
+                          {m.memberCode} • {m.points} Poin
+                        </span>
+                      </div>
+                      <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px] font-bold">
+                        {Math.round(m.discountRate * 100)}% Diskon
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Customer Name quick input */}
         <div className="px-4 py-2 bg-white border-b border-[#e5eeff] flex items-center gap-2">
           <span className="material-symbols-outlined text-[#757682] text-sm">person</span>
@@ -347,7 +601,7 @@ export const CashierView: React.FC<CashierViewProps> = ({
             type="text"
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
-            placeholder="Customer Name (Optional)"
+            placeholder="Nama Pelanggan / Catatan Meja"
             className="w-full text-xs text-[#0b1c30] placeholder:text-[#757682] outline-none bg-transparent"
           />
         </div>
@@ -648,6 +902,49 @@ export const CashierView: React.FC<CashierViewProps> = ({
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Barcode Camera & USB Scanner Modal */}
+      <BarcodeScannerModal
+        isOpen={isBarcodeScannerOpen}
+        onClose={() => setIsBarcodeScannerOpen(false)}
+        products={products}
+        settings={settings}
+        onScanProduct={(product) => {
+          handleAddToCart(product);
+          if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+          setScanToast({ name: product.name, sku: product.sku, price: product.price });
+          toastTimeoutRef.current = setTimeout(() => setScanToast(null), 3500);
+        }}
+      />
+
+      {/* Floating Barcode Scan Success Toast */}
+      {scanToast && (
+        <div
+          id="barcode-scan-toast"
+          className="fixed bottom-6 right-6 z-50 bg-[#00236f] text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-[#d3e4fe]/30 animate-in fade-in slide-in-from-bottom-5 duration-200"
+        >
+          <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+            <span className="material-symbols-outlined text-lg">check</span>
+          </div>
+          <div>
+            <p className="text-xs font-bold flex items-center gap-1.5">
+              <span>+1 {scanToast.name}</span>
+              <span className="text-emerald-300 font-normal">ditambahkan</span>
+            </p>
+            <p className="text-[11px] text-slate-300 font-mono">
+              SKU: {scanToast.sku} • {formatCurrency(scanToast.price, settings.currencySymbol)}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setScanToast(null)}
+            className="text-slate-300 hover:text-white ml-2 text-xs cursor-pointer"
+            aria-label="Tutup Toast"
+          >
+            <span className="material-symbols-outlined text-base">close</span>
+          </button>
         </div>
       )}
     </div>

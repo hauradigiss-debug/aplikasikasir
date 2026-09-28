@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Product, Order, StoreSettings, NavigationTab, CategoryType, User } from './types';
-import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_SETTINGS, INITIAL_USERS } from './data/initialData';
+import { Product, Order, StoreSettings, NavigationTab, CategoryType, User, Member } from './types';
+import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_SETTINGS, INITIAL_USERS, INITIAL_MEMBERS } from './data/initialData';
+import { api } from './services/api';
 import { NavigationDrawer } from './components/NavigationDrawer';
 import { InventoryView } from './components/InventoryView';
 import { CashierView } from './components/CashierView';
@@ -8,6 +9,7 @@ import { DashboardView } from './components/DashboardView';
 import { HistoryView } from './components/HistoryView';
 import { CategoryView } from './components/CategoryView';
 import { SettingsView } from './components/SettingsView';
+import { MemberPortalView } from './components/MemberPortalView';
 import { ProductModal } from './components/ProductModal';
 import { StockAdjustModal } from './components/StockAdjustModal';
 import { ReceiptModal } from './components/ReceiptModal';
@@ -75,6 +77,11 @@ export default function App() {
     return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
   });
 
+  const [members, setMembers] = useState<Member[]>(() => {
+    const saved = localStorage.getItem('stationery_pos_members');
+    return saved ? JSON.parse(saved) : INITIAL_MEMBERS;
+  });
+
   const [activeTab, setActiveTab] = useState<NavigationTab>('products');
 
   // Modal states
@@ -87,10 +94,44 @@ export default function App() {
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
   const [activeReceiptOrder, setActiveReceiptOrder] = useState<Order | null>(null);
 
-  // Sync to localStorage
+  // Sync state with Turso Cloud on mount
+  useEffect(() => {
+    let isMounted = true;
+    api.getBootstrap().then((bootstrap) => {
+      if (!isMounted || !bootstrap) return;
+      if (bootstrap.products && bootstrap.products.length > 0) {
+        setProducts(bootstrap.products);
+      }
+      if (bootstrap.orders) {
+        setOrders(bootstrap.orders);
+      }
+      if (bootstrap.users && bootstrap.users.length > 0) {
+        setUsers(bootstrap.users);
+      }
+      if (bootstrap.categories && bootstrap.categories.length > 0) {
+        setCategories(bootstrap.categories);
+      }
+      if (bootstrap.settings) {
+        setSettings(bootstrap.settings);
+      }
+      if (bootstrap.members && bootstrap.members.length > 0) {
+        setMembers(bootstrap.members);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Sync to localStorage as offline fallback
   useEffect(() => {
     localStorage.setItem('stationery_pos_users', JSON.stringify(users));
   }, [users]);
+
+  useEffect(() => {
+    localStorage.setItem('stationery_pos_members', JSON.stringify(members));
+  }, [members]);
 
   useEffect(() => {
     if (currentUser) {
@@ -119,7 +160,6 @@ export default function App() {
   // Auth Handlers
   const handleLogin = (user: User) => {
     setCurrentUser(user);
-    // update lastLogin
     setUsers((prev) =>
       prev.map((u) => (u.id === user.id ? { ...u, lastLogin: new Date().toISOString() } : u))
     );
@@ -129,7 +169,26 @@ export default function App() {
     setCurrentUser(null);
   };
 
-  // Product CRUD
+  // Member Loyalty handlers
+  const handleMemberPointEarned = (memberId: string, pointsEarned: number) => {
+    setMembers((prev) =>
+      prev.map((m) => {
+        if (m.id === memberId) {
+          const newPoints = m.points + pointsEarned;
+          // Sync with Turso DB
+          api.updateMember(memberId, { points: newPoints });
+          return { ...m, points: newPoints };
+        }
+        return m;
+      })
+    );
+  };
+
+  const handleMemberCreated = (newMember: Member) => {
+    setMembers((prev) => [newMember, ...prev.filter((m) => m.id !== newMember.id)]);
+  };
+
+  // Product CRUD (Synced to Turso Cloud)
   const handleOpenAddProduct = () => {
     setProductToEdit(null);
     setIsProductModalOpen(true);
@@ -148,13 +207,15 @@ export default function App() {
       }
       return [product, ...prev];
     });
+    api.saveProduct(product).catch(console.error);
   };
 
   const handleDeleteProduct = (productId: string) => {
     setProducts((prev) => prev.filter((p) => p.id !== productId));
+    api.deleteProduct(productId).catch(console.error);
   };
 
-  // Stock Adjustment
+  // Stock Adjustment (Synced to Turso Cloud)
   const handleOpenStockAdjust = (product: Product) => {
     setProductForStock(product);
     setIsStockAdjustOpen(true);
@@ -164,14 +225,13 @@ export default function App() {
     setProducts((prev) =>
       prev.map((p) => (p.id === productId ? { ...p, stock: newStock } : p))
     );
+    api.adjustStock(productId, newStock).catch(console.error);
   };
 
-  // Complete POS Sale
+  // Complete POS Sale (Atomic transaction with Turso Cloud)
   const handleCompleteSale = (newOrder: Order) => {
-    // 1. Add order to sales list
     setOrders((prev) => [newOrder, ...prev]);
 
-    // 2. Deduct inventory stock
     setProducts((prev) =>
       prev.map((p) => {
         const cartItem = newOrder.items.find((item) => item.product.id === p.id);
@@ -184,6 +244,8 @@ export default function App() {
         return p;
       })
     );
+
+    api.createOrder(newOrder).catch(console.error);
   };
 
   // Refund Order
@@ -191,23 +253,22 @@ export default function App() {
     const targetOrder = orders.find((o) => o.id === orderId);
     if (!targetOrder || targetOrder.status === 'refunded') return;
 
-    // Update order status
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId ? { ...o, status: 'refunded' } : o))
     );
 
-    // Restock items
     setProducts((prev) =>
       prev.map((p) => {
         const item = targetOrder.items.find((i) => i.product.id === p.id);
         if (item) {
-          return { ...p, stock: p.stock + item.quantity };
+          const newStk = p.stock + item.quantity;
+          api.adjustStock(p.id, newStk).catch(console.error);
+          return { ...p, stock: newStk };
         }
         return p;
       })
     );
 
-    // Update active receipt if currently viewing
     if (activeReceiptOrder?.id === orderId) {
       setActiveReceiptOrder({ ...activeReceiptOrder, status: 'refunded' });
     }
@@ -219,19 +280,44 @@ export default function App() {
     setIsReceiptOpen(true);
   };
 
-  // Category
+  // Categories
   const handleAddCategory = (categoryName: CategoryType) => {
     if (!categories.includes(categoryName)) {
-      setCategories((prev) => [...prev, categoryName]);
+      const updated = [...categories, categoryName];
+      setCategories(updated);
+      api.saveCategories(updated).catch(console.error);
     }
   };
 
-  // Reset Data
-  const handleResetData = () => {
-    setProducts(INITIAL_PRODUCTS);
-    setOrders(INITIAL_ORDERS);
-    setSettings(INITIAL_SETTINGS);
-    setCategories(DEFAULT_CATEGORIES);
+  // Settings & Users Sync
+  const handleSaveSettings = (newSettings: StoreSettings) => {
+    setSettings(newSettings);
+    api.saveSettings(newSettings).catch(console.error);
+  };
+
+  const handleSaveUsers = (newUsers: User[]) => {
+    setUsers(newUsers);
+    for (const u of newUsers) {
+      api.saveUser(u).catch(console.error);
+    }
+  };
+
+  // Reset Data (Resets and re-seeds Turso Cloud)
+  const handleResetData = async () => {
+    await api.resetDatabase();
+    const fresh = await api.getBootstrap();
+    if (fresh) {
+      setProducts(fresh.products);
+      setOrders(fresh.orders);
+      setSettings(fresh.settings);
+      setCategories(fresh.categories);
+      setUsers(fresh.users);
+    } else {
+      setProducts(INITIAL_PRODUCTS);
+      setOrders(INITIAL_ORDERS);
+      setSettings(INITIAL_SETTINGS);
+      setCategories(DEFAULT_CATEGORIES);
+    }
     localStorage.removeItem('stationery_pos_products');
     localStorage.removeItem('stationery_pos_orders');
     localStorage.removeItem('stationery_pos_settings');
@@ -242,7 +328,36 @@ export default function App() {
 
   // If not authenticated, display enterprise login view
   if (!currentUser) {
-    return <LoginView users={users} onLogin={handleLogin} />;
+    return (
+      <LoginView
+        users={users}
+        members={members}
+        onLogin={handleLogin}
+        onMemberCreated={handleMemberCreated}
+      />
+    );
+  }
+
+  // If authenticated user is a Member, show the Member Loyalty Portal
+  if (currentUser.role === 'member') {
+    const activeMember =
+      currentUser.memberData ||
+      members.find((m) => m.id === currentUser.id || m.username === currentUser.username) ||
+      members[0];
+
+    return (
+      <MemberPortalView
+        member={activeMember}
+        orders={orders}
+        settings={settings}
+        onLogout={handleLogout}
+        onOpenCashier={() => {
+          const cashierUser = users.find((u) => u.role === 'cashier') || users[0];
+          setCurrentUser(cashierUser);
+          setActiveTab('cashier');
+        }}
+      />
+    );
   }
 
   return (
@@ -278,9 +393,106 @@ export default function App() {
               categories={categories}
               settings={settings}
               currentUser={currentUser}
+              members={members}
+              onMemberPointEarned={handleMemberPointEarned}
               onCompleteSale={handleCompleteSale}
               onOpenReceipt={handleOpenReceipt}
             />
+          )}
+
+          {activeTab === 'members' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl p-6 border border-[#c5c5d3]/70 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-bold text-[#0b1c30]">Member Loyalty Management</h1>
+                  <p className="text-xs text-[#757682] mt-0.5">
+                    Data keanggotaan pelanggan, poin belanja, dan barcode digital tersinkron dengan database Turso.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const sampleMember = members[0];
+                    if (sampleMember) {
+                      setCurrentUser({
+                        id: sampleMember.id,
+                        username: sampleMember.username,
+                        fullName: sampleMember.fullName,
+                        role: 'member',
+                        avatar: sampleMember.avatar,
+                        memberData: sampleMember,
+                      });
+                    }
+                  }}
+                  className="px-4 py-2.5 bg-[#00236f] hover:bg-[#12398c] text-white text-xs font-semibold rounded-xl flex items-center gap-2 cursor-pointer shadow-xs"
+                >
+                  <span className="material-symbols-outlined text-base">badge</span>
+                  <span>Buka Portal Member</span>
+                </button>
+              </div>
+
+              {/* Members Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {members.map((m) => (
+                  <div
+                    key={m.id}
+                    className="bg-white rounded-2xl p-5 border border-[#c5c5d3]/70 shadow-xs hover:border-[#00236f]/40 transition-colors flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase bg-amber-100 text-amber-900 border border-amber-300">
+                          {m.tier} Member
+                        </span>
+                        <span className="text-xs font-bold text-emerald-700">
+                          {Math.round(m.discountRate * 100)}% Diskon
+                        </span>
+                      </div>
+
+                      <h3 className="font-bold text-base text-[#0b1c30]">{m.fullName}</h3>
+                      <p className="text-xs text-slate-500 font-mono mt-0.5">@{m.username}</p>
+
+                      <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-200/70 text-xs space-y-1">
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Kode Member:</span>
+                          <span className="font-mono font-bold text-[#00236f]">{m.memberCode}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Poin Hadiah:</span>
+                          <span className="font-bold text-amber-700">{m.points} Pts</span>
+                        </div>
+                        {m.phone && (
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">No. WhatsApp:</span>
+                            <span className="font-mono text-slate-700">{m.phone}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-[11px] text-slate-400">Barcode aktif di Kasir</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCurrentUser({
+                            id: m.id,
+                            username: m.username,
+                            fullName: m.fullName,
+                            role: 'member',
+                            avatar: m.avatar,
+                            memberData: m,
+                          });
+                        }}
+                        className="text-xs font-bold text-[#00236f] hover:underline cursor-pointer flex items-center gap-1"
+                      >
+                        <span>Lihat Kartu</span>
+                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
 
           {activeTab === 'dashboard' && (
@@ -317,8 +529,8 @@ export default function App() {
               settings={settings}
               users={users}
               currentUser={currentUser}
-              onSaveSettings={setSettings}
-              onSaveUsers={setUsers}
+              onSaveSettings={handleSaveSettings}
+              onSaveUsers={handleSaveUsers}
               onResetData={handleResetData}
             />
           )}
