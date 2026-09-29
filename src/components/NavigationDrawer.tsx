@@ -26,6 +26,17 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
     { id: 'members' as NavigationTab, label: 'Member Loyalty', icon: 'card_membership', badge: 0 },
     { id: 'history' as NavigationTab, label: 'Sales Report', icon: 'receipt_long', badge: 0 },
     { id: 'categories' as NavigationTab, label: 'Category Setup', icon: 'category', badge: 0 },
+    ...(currentUser?.role === 'super_admin'
+      ? [
+          {
+            id: 'admin_security' as NavigationTab,
+            label: 'CRUD Password Admin',
+            icon: 'shield_lock',
+            badge: 0,
+            special: true,
+          },
+        ]
+      : []),
     { id: 'settings' as NavigationTab, label: 'Settings', icon: 'settings', badge: 0 },
   ];
 
@@ -87,6 +98,17 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
                   </span>
                   <span className="text-[15px] font-medium tracking-tight">{item.label}</span>
                 </div>
+                {(item as any).special && (
+                  <span
+                    className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                      isActive
+                        ? 'bg-amber-300 text-amber-950 font-bold'
+                        : 'bg-blue-100 text-[#00236f] border border-blue-200'
+                    }`}
+                  >
+                    Admin
+                  </span>
+                )}
                 {item.badge > 0 && (
                   <span
                     className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
@@ -106,9 +128,21 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
         {/* Quick Shift / User summary with Logout */}
         <div className="mx-4 mt-auto p-3.5 bg-[#f8f9ff] border border-[#d3e4fe]/80 rounded-xl">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold text-[#00236f] uppercase tracking-wider bg-white px-2 py-0.5 rounded border border-[#d3e4fe]">
-              {currentUser?.role === 'super_admin' ? 'SUPER ADMIN' : 'REGISTER POS'}
-            </span>
+            {currentUser?.role === 'super_admin' ? (
+              <button
+                type="button"
+                onClick={() => setActiveTab('admin_security')}
+                className="text-[10px] font-bold text-[#00236f] hover:bg-[#d3e4fe] uppercase tracking-wider bg-white px-2 py-0.5 rounded border border-[#d3e4fe] flex items-center gap-1 cursor-pointer transition-colors"
+                title="Buka Menu CRUD Password Super Admin"
+              >
+                <span className="material-symbols-outlined text-[13px]">shield_lock</span>
+                <span>SUPER ADMIN</span>
+              </button>
+            ) : (
+              <span className="text-[10px] font-bold text-[#00236f] uppercase tracking-wider bg-white px-2 py-0.5 rounded border border-[#d3e4fe]">
+                REGISTER POS
+              </span>
+            )}
             <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               Online
@@ -197,6 +231,17 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
                         <span className="material-symbols-outlined text-xl">{item.icon}</span>
                         <span className="text-sm font-medium">{item.label}</span>
                       </div>
+                      {(item as any).special && (
+                        <span
+                          className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                            isActive
+                              ? 'bg-amber-300 text-amber-950 font-bold'
+                              : 'bg-blue-100 text-[#00236f] border border-blue-200'
+                          }`}
+                        >
+                          Admin
+                        </span>
+                      )}
                       {item.badge > 0 && (
                         <span
                           className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${

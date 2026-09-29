@@ -10,6 +10,7 @@ import { HistoryView } from './components/HistoryView';
 import { CategoryView } from './components/CategoryView';
 import { SettingsView } from './components/SettingsView';
 import { MemberPortalView } from './components/MemberPortalView';
+import { SuperAdminSecurityView } from './components/SuperAdminSecurityView';
 import { ProductModal } from './components/ProductModal';
 import { StockAdjustModal } from './components/StockAdjustModal';
 import { ReceiptModal } from './components/ReceiptModal';
@@ -302,6 +303,31 @@ export default function App() {
     }
   };
 
+  const handleUpdateUserPassword = async (
+    userId: string,
+    newPassword: string,
+    oldPassword?: string,
+    forceReset?: boolean
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.updateUserPassword(userId, newPassword, oldPassword, forceReset);
+      if (res.success) {
+        setUsers((prev) =>
+          prev.map((u) => (u.id === userId ? { ...u, password: newPassword } : u))
+        );
+        if (currentUser && currentUser.id === userId) {
+          const updatedUser: User = { ...currentUser, password: newPassword };
+          setCurrentUser(updatedUser);
+          localStorage.setItem('stationery_pos_current_user', JSON.stringify(updatedUser));
+        }
+        return { success: true };
+      }
+      return { success: false, error: res.error };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Gagal mengubah password' };
+    }
+  };
+
   // Reset Data (Resets and re-seeds Turso Cloud)
   const handleResetData = async () => {
     await api.resetDatabase();
@@ -524,6 +550,16 @@ export default function App() {
             />
           )}
 
+          {activeTab === 'admin_security' && (
+            <SuperAdminSecurityView
+              users={users}
+              currentUser={currentUser}
+              settings={settings}
+              onSaveUsers={handleSaveUsers}
+              onUpdateUserPassword={handleUpdateUserPassword}
+            />
+          )}
+
           {activeTab === 'settings' && (
             <SettingsView
               settings={settings}
@@ -532,6 +568,8 @@ export default function App() {
               onSaveSettings={handleSaveSettings}
               onSaveUsers={handleSaveUsers}
               onResetData={handleResetData}
+              onNavigate={setActiveTab}
+              onUpdateUserPassword={handleUpdateUserPassword}
             />
           )}
         </div>

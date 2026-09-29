@@ -83,4 +83,4 @@ export interface StoreSettings {
   enableSound: boolean;
 }
 
-export type NavigationTab = 'dashboard' | 'products' | 'cashier' | 'history' | 'categories' | 'members' | 'settings';
+export type NavigationTab = 'dashboard' | 'products' | 'cashier' | 'history' | 'categories' | 'members' | 'settings' | 'admin_security';

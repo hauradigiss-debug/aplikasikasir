@@ -224,6 +224,26 @@ export const api = {
     }
   },
 
+  // Update user password (CRUD Password Super Admin)
+  async updateUserPassword(
+    id: string,
+    newPassword: string,
+    oldPassword?: string,
+    forceReset?: boolean
+  ): Promise<{ success: boolean; message?: string; error?: string }> {
+    try {
+      const res = await fetch(`/api/users/${encodeURIComponent(id)}/password`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPassword, oldPassword, forceReset }),
+      });
+      const data = await res.json();
+      return data;
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Gagal menghubungi server update password' };
+    }
+  },
+
   // Save store settings
   async saveSettings(settings: StoreSettings): Promise<boolean> {
     try {

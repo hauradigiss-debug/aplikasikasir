@@ -647,6 +647,53 @@ async function startServer() {
     }
   });
 
+  // Dedicated Password CRUD & Update for Super Admin
+  app.put('/api/users/:id/password', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { newPassword, oldPassword, forceReset } = req.body;
+
+      if (!newPassword || typeof newPassword !== 'string' || newPassword.trim().length === 0) {
+        return res.status(400).json({ success: false, error: 'Password baru tidak boleh kosong' });
+      }
+
+      const cleanNewPassword = newPassword.trim();
+      const db = getTursoClient();
+
+      const userRes = await db.execute({
+        sql: 'SELECT * FROM users WHERE id = ? LIMIT 1',
+        args: [id],
+      });
+
+      if (userRes.rows.length === 0) {
+        return res.status(404).json({ success: false, error: 'Akun pengguna tidak ditemukan' });
+      }
+
+      const existingUser: any = userRes.rows[0];
+
+      // If oldPassword is provided and not a forceReset, verify current password
+      if (oldPassword !== undefined && !forceReset) {
+        if (String(existingUser.password) !== String(oldPassword).trim()) {
+          return res.status(400).json({ success: false, error: 'Password saat ini (lama) tidak cocok' });
+        }
+      }
+
+      await db.execute({
+        sql: 'UPDATE users SET password = ? WHERE id = ?',
+        args: [cleanNewPassword, id],
+      });
+
+      res.json({
+        success: true,
+        message: `Password akun @${existingUser.username} berhasil diperbarui di Turso Cloud`,
+        userId: id,
+        username: String(existingUser.username),
+      });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error?.message });
+    }
+  });
+
   // 7. Settings API
   app.post('/api/settings', async (req: Request, res: Response) => {
     try {

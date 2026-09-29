@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StoreSettings, User, UserRole } from '../types';
+import { StoreSettings, User, UserRole, NavigationTab } from '../types';
 import { api, DatabaseStatus } from '../services/api';
 
 interface SettingsViewProps {
@@ -9,6 +9,13 @@ interface SettingsViewProps {
   onSaveSettings: (newSettings: StoreSettings) => void;
   onSaveUsers?: (newUsers: User[]) => void;
   onResetData: () => void;
+  onNavigate?: (tab: NavigationTab) => void;
+  onUpdateUserPassword?: (
+    userId: string,
+    newPassword: string,
+    oldPassword?: string,
+    forceReset?: boolean
+  ) => Promise<{ success: boolean; error?: string }>;
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
@@ -18,6 +25,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   onSaveSettings,
   onSaveUsers,
   onResetData,
+  onNavigate,
+  onUpdateUserPassword,
 }) => {
   const [formData, setFormData] = useState<StoreSettings>({ ...settings });
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -35,6 +44,61 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       setTursoStatus({ connected: false, error: err?.message });
     } finally {
       setIsPinging(false);
+    }
+  };
+
+  // Change Password Modal State
+  const [userToEditPass, setUserToEditPass] = useState<User | null>(null);
+  const [editNewPassword, setEditNewPassword] = useState('');
+  const [editPassError, setEditPassError] = useState('');
+  const [showEditPass, setShowEditPass] = useState(false);
+  const [isUpdatingPass, setIsUpdatingPass] = useState(false);
+
+  const handleOpenEditPassword = (u: User) => {
+    setUserToEditPass(u);
+    setEditNewPassword('');
+    setEditPassError('');
+    setShowEditPass(false);
+  };
+
+  const handleSaveEditPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userToEditPass) return;
+    setEditPassError('');
+
+    if (!editNewPassword.trim()) {
+      setEditPassError('Password baru tidak boleh kosong');
+      return;
+    }
+
+    if (editNewPassword.trim().length < 3) {
+      setEditPassError('Password minimal 3 karakter');
+      return;
+    }
+
+    setIsUpdatingPass(true);
+    try {
+      if (onUpdateUserPassword) {
+        const res = await onUpdateUserPassword(userToEditPass.id, editNewPassword.trim(), undefined, true);
+        if (res.success) {
+          setUserSuccessMsg(`Password @${userToEditPass.username} berhasil diperbarui di database Turso!`);
+          setTimeout(() => setUserSuccessMsg(''), 4000);
+          setUserToEditPass(null);
+        } else {
+          setEditPassError(res.error || 'Gagal mengubah password');
+        }
+      } else {
+        // Fallback update user in state
+        const updated = users.map((u) => (u.id === userToEditPass.id ? { ...u, password: editNewPassword.trim() } : u));
+        onSaveUsers?.(updated);
+        setUserSuccessMsg(`Password @${userToEditPass.username} berhasil diperbarui!`);
+        setTimeout(() => setUserSuccessMsg(''), 4000);
+        setUserToEditPass(null);
+      }
+    } catch (err: any) {
+      setEditPassError(err?.message || 'Gagal menghubungi server');
+    } finally {
+      setIsUpdatingPass(false);
     }
   };
 
@@ -184,18 +248,31 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               Kelola kredensial akun Super Admin, Kasir, dan Manajer register POS
             </p>
           </div>
-          {onSaveUsers && (
-            <button
-              type="button"
-              onClick={() => setShowAddUser(!showAddUser)}
-              className="px-4 h-9 bg-[#00236f] hover:bg-[#1e3a8a] text-white text-xs font-bold rounded-full flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[18px]">
-                {showAddUser ? 'close' : 'person_add'}
-              </span>
-              {showAddUser ? 'Tutup Form' : 'Tambah Kasir/Staf'}
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {onNavigate && currentUser?.role === 'super_admin' && (
+              <button
+                type="button"
+                onClick={() => onNavigate('admin_security')}
+                className="px-3.5 h-9 bg-blue-50 hover:bg-blue-100 text-[#00236f] border border-blue-200 text-xs font-bold rounded-full flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                title="Buka panel khusus CRUD Password Super Admin"
+              >
+                <span className="material-symbols-outlined text-[17px]">shield_lock</span>
+                <span>CRUD Password Admin</span>
+              </button>
+            )}
+            {onSaveUsers && (
+              <button
+                type="button"
+                onClick={() => setShowAddUser(!showAddUser)}
+                className="px-4 h-9 bg-[#00236f] hover:bg-[#1e3a8a] text-white text-xs font-bold rounded-full flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {showAddUser ? 'close' : 'person_add'}
+                </span>
+                {showAddUser ? 'Tutup Form' : 'Tambah Kasir/Staf'}
+              </button>
+            )}
+          </div>
         </div>
 
         {userSuccessMsg && (
@@ -341,17 +418,26 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       </span>
                     </td>
                     <td className="py-3 px-3 text-right">
-                      {isSuper ? (
-                        <span className="text-[11px] text-[#757682] font-semibold italic">Akun Utama</span>
-                      ) : (
+                      <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
-                          onClick={() => handleDeleteUser(u.id, u.username)}
-                          className="text-red-600 hover:text-red-800 font-semibold hover:underline"
+                          onClick={() => handleOpenEditPassword(u)}
+                          className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1"
+                          title={`Ubah password akun @${u.username}`}
                         >
-                          Hapus
+                          <span className="material-symbols-outlined text-[14px] text-[#00236f]">key</span>
+                          <span>Ubah Password</span>
                         </button>
-                      )}
+                        {!isSuper && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteUser(u.id, u.username)}
+                            className="text-red-600 hover:text-red-800 font-semibold hover:underline text-[11px] px-1"
+                          >
+                            Hapus
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -360,6 +446,79 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </table>
         </div>
       </div>
+
+      {/* Change Password Modal */}
+      {userToEditPass && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
+          <div className="bg-white w-full max-w-sm rounded-2xl border border-slate-200 shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#00236f]">key</span>
+                <h3 className="text-sm font-bold text-[#0b1c30]">
+                  Ubah Password @{userToEditPass.username}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setUserToEditPass(null)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                ✕
+              </button>
+            </div>
+
+            {editPassError && (
+              <div className="p-2.5 bg-red-50 border border-red-200 text-red-800 text-xs font-semibold rounded-xl">
+                {editPassError}
+              </div>
+            )}
+
+            <form onSubmit={handleSaveEditPassword} className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Password Baru ({userToEditPass.fullName})
+                </label>
+                <div className="relative">
+                  <input
+                    type={showEditPass ? 'text' : 'password'}
+                    required
+                    value={editNewPassword}
+                    onChange={(e) => setEditNewPassword(e.target.value)}
+                    placeholder="Masukkan password baru"
+                    className="w-full h-9 px-3 pr-9 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowEditPass(!showEditPass)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">
+                      {showEditPass ? 'visibility_off' : 'visibility'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setUserToEditPass(null)}
+                  className="px-3 h-8 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdatingPass}
+                  className="px-4 h-8 bg-[#00236f] text-white text-xs font-bold rounded-lg shadow-xs cursor-pointer disabled:opacity-50"
+                >
+                  {isUpdatingPass ? 'Menyimpan...' : 'Simpan Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Store Profile */}

@@ -1,6 +1,6 @@
 {
   "name": "StationeryPOS",
-  "description": "Sistem POS Kasir dan Inventaris Alat Tulis dengan pemindai barcode kamera & hardware USB, pendaftaran member loyalty, sinkronisasi database Turso SQL, dan laporan penjualan.",
+  "description": "Sistem POS Kasir dan Inventaris Alat Tulis dengan pemindai barcode kamera & hardware USB, pendaftaran member loyalty, manajemen CRUD password Super Admin, sinkronisasi database Turso SQL, dan laporan penjualan.",
   "requestFramePermissions": ["camera"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
