@@ -252,27 +252,27 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
   return (
     <div
       id="barcode-scanner-modal-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/70 backdrop-blur-xs select-none"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-xs select-none"
     >
       <div
         id="barcode-scanner-modal-card"
-        className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 transition-colors"
       >
         {/* Modal Header */}
-        <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
+        <div className="px-5 py-3.5 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#00236f] text-white flex items-center justify-center shadow-xs">
+            <div className="w-8 h-8 rounded-lg bg-[#00236f] dark:bg-blue-600 text-white flex items-center justify-center shadow-xs">
               <span className="material-symbols-outlined text-lg">barcode_scanner</span>
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold text-[#0b1c30] flex items-center gap-2">
+              <h2 className="text-sm sm:text-base font-bold text-[#0b1c30] dark:text-slate-100 flex items-center gap-2">
                 Scanner Barcode & SKU Kasir
-                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                   Siap Scan
                 </span>
               </h2>
-              <p className="text-[11px] text-[#5a6072]">
+              <p className="text-[11px] text-[#5a6072] dark:text-slate-400">
                 Arahkan barcode ke kamera, gunakan scanner USB handheld, atau ketik SKU produk.
               </p>
             </div>
@@ -281,7 +281,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-200 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             aria-label="Tutup Modal"
           >
             <span className="material-symbols-outlined text-xl">close</span>
@@ -294,7 +294,7 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
           <form onSubmit={handleManualSubmit} className="relative">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-lg">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 dark:text-slate-500 text-lg">
                   qr_code
                 </span>
                 <input
@@ -303,19 +303,19 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
                   value={manualCode}
                   onChange={(e) => setManualCode(e.target.value)}
                   placeholder="Ketik atau scan barcode (e.g. N-MOL-001) lalu tekan Enter..."
-                  className="w-full pl-9 pr-3 h-10 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-mono text-[#0b1c30] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00236f] focus:bg-white transition-all"
+                  className="w-full pl-9 pr-3 h-10 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm font-mono text-[#0b1c30] dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#00236f] dark:focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800 transition-all"
                 />
               </div>
               <button
                 type="submit"
                 disabled={!manualCode.trim()}
-                className="px-4 h-10 bg-[#00236f] hover:bg-[#1a388b] disabled:bg-slate-300 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed shadow-xs shrink-0"
+                className="px-4 h-10 bg-[#00236f] dark:bg-blue-600 hover:bg-[#1a388b] dark:hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed shadow-xs shrink-0"
               >
                 <span className="material-symbols-outlined text-sm">add_shopping_cart</span>
                 <span>Tambah</span>
               </button>
             </div>
-            <p className="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
               <span className="material-symbols-outlined text-[13px] text-slate-400">info</span>
               Scanner fisik USB / Bluetooth otomatis mendeteksi tanpa perlu klik tombol.
             </p>
@@ -444,45 +444,45 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
           </div>
 
           {/* Toggle Sample Barcode Sheet for Testing */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
+          <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-xl p-3">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xs font-bold text-[#0b1c30] flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-base text-[#00236f]">receipt_long</span>
+                <h3 className="text-xs font-bold text-[#0b1c30] dark:text-slate-100 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-[#00236f] dark:text-blue-400">receipt_long</span>
                   Lembar Barcode Sampel Produk
                 </h3>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
                   Uji coba scan langsung dari layar atau klik tombol simulasi scan.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowSampleBarcodes(!showSampleBarcodes)}
-                className="px-3 py-1 bg-white hover:bg-slate-100 border border-slate-300 text-xs font-semibold text-slate-700 rounded-lg transition-colors cursor-pointer"
+                className="px-3 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 border border-slate-300 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 rounded-lg transition-colors cursor-pointer"
               >
                 {showSampleBarcodes ? 'Sembunyikan' : 'Buka Lembar Barcode'}
               </button>
             </div>
 
             {showSampleBarcodes && (
-              <div className="mt-3 pt-3 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-56 overflow-y-auto pr-1">
+              <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-56 overflow-y-auto pr-1">
                 {products.slice(0, 10).map((prod) => (
                   <div
                     key={prod.id}
-                    className="p-2.5 bg-white border border-slate-200 rounded-lg flex items-center justify-between gap-2 shadow-2xs"
+                    className="p-2.5 bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-lg flex items-center justify-between gap-2 shadow-2xs"
                   >
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-[#0b1c30] truncate">{prod.name}</p>
-                      <p className="text-[11px] font-mono text-[#00236f]">{prod.sku}</p>
-                      <p className="text-[11px] text-slate-500">{formatCurrency(prod.price, settings.currencySymbol)}</p>
-                      <div className="mt-1">
+                      <p className="text-xs font-bold text-[#0b1c30] dark:text-slate-100 truncate">{prod.name}</p>
+                      <p className="text-[11px] font-mono text-[#00236f] dark:text-blue-300">{prod.sku}</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">{formatCurrency(prod.price, settings.currencySymbol)}</p>
+                      <div className="mt-1 bg-white p-1 rounded">
                         <BarcodeRenderer value={prod.sku} height={28} width={1.2} fontSize={9} />
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => handleProcessCode(prod.sku)}
-                      className="px-2.5 py-1.5 bg-[#00236f] hover:bg-[#1a388b] text-white text-[11px] font-bold rounded-lg shrink-0 transition-colors shadow-2xs flex items-center gap-1 cursor-pointer"
+                      className="px-2.5 py-1.5 bg-[#00236f] dark:bg-blue-600 hover:bg-[#1a388b] dark:hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg shrink-0 transition-colors shadow-2xs flex items-center gap-1 cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-sm">touch_app</span>
                       Simulasi Scan
@@ -495,16 +495,16 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
 
           {/* Recent Scans Session Log */}
           {recentScans.length > 0 && (
-            <div className="border border-slate-200 rounded-xl p-3 bg-white">
+            <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-3 bg-white dark:bg-slate-850">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-[#0b1c30] flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-sm text-emerald-600">history</span>
+                <span className="text-xs font-bold text-[#0b1c30] dark:text-slate-100 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-sm text-emerald-600 dark:text-emerald-400">history</span>
                   Item Terpindai Dalam Sesi Ini ({recentScans.reduce((sum, item) => sum + item.count, 0)})
                 </span>
                 <button
                   type="button"
                   onClick={() => setRecentScans([])}
-                  className="text-[11px] text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                  className="text-[11px] text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer"
                 >
                   Bersihkan Riwayat
                 </button>
@@ -514,17 +514,17 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
                 {recentScans.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between text-xs py-1.5 px-2 bg-slate-50 rounded-lg border border-slate-100"
+                    className="flex items-center justify-between text-xs py-1.5 px-2 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-5 h-5 rounded-full bg-[#00236f]/10 text-[#00236f] flex items-center justify-center font-bold text-[10px] shrink-0">
+                      <span className="w-5 h-5 rounded-full bg-[#00236f]/10 dark:bg-blue-900/40 text-[#00236f] dark:text-blue-300 flex items-center justify-center font-bold text-[10px] shrink-0">
                         {item.count}x
                       </span>
-                      <span className="font-semibold text-slate-800 truncate">{item.product.name}</span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">{item.product.name}</span>
                       <span className="font-mono text-[10px] text-slate-400 hidden sm:inline">{item.product.sku}</span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="font-bold text-[#00236f]">
+                      <span className="font-bold text-[#00236f] dark:text-blue-300">
                         {formatCurrency(item.product.price * item.count, settings.currencySymbol)}
                       </span>
                       <span className="text-[10px] text-slate-400">{item.timestamp}</span>
@@ -537,15 +537,15 @@ export const BarcodeScannerModal: React.FC<BarcodeScannerModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0">
-          <span className="text-xs text-slate-500 flex items-center gap-1.5">
+        <div className="px-5 py-3 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+          <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
             <span className="material-symbols-outlined text-sm text-slate-400">keyboard</span>
-            Tekan <kbd className="px-1.5 py-0.5 bg-white border border-slate-300 rounded font-mono text-[10px]">ESC</kbd> untuk kembali ke kasir
+            Tekan <kbd className="px-1.5 py-0.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded font-mono text-[10px] text-slate-700 dark:text-slate-300">ESC</kbd> untuk kembali ke kasir
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="px-5 h-9 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+            className="px-5 h-9 bg-slate-800 dark:bg-blue-600 hover:bg-slate-900 dark:hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
           >
             Selesai & Ke Keranjang
           </button>

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Order, StoreSettings } from '../types';
 import { formatCurrency } from '../utils';
+import { usePrinter } from '../context/PrinterContext';
 
 interface ReceiptModalProps {
   isOpen: boolean;
@@ -17,7 +18,29 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   settings,
   onRefund,
 }) => {
+  const { printReceipt, isConnected, status: printerStatus, openPrinterModal } = usePrinter();
+  const [btStatusMsg, setBtStatusMsg] = useState<string | null>(null);
+  const [isSendingBt, setIsSendingBt] = useState(false);
+
   if (!isOpen || !order) return null;
+
+  const handleBtPrint = async () => {
+    setIsSendingBt(true);
+    setBtStatusMsg(null);
+    try {
+      const ok = await printReceipt(order, settings);
+      if (ok) {
+        setBtStatusMsg('Struk tercetak ke Mini Printer BT!');
+        setTimeout(() => setBtStatusMsg(null), 3000);
+      } else {
+        setBtStatusMsg('Gagal mengirim ke printer.');
+      }
+    } catch (err: any) {
+      setBtStatusMsg(err?.message || 'Gagal cetak');
+    } finally {
+      setIsSendingBt(false);
+    }
+  };
 
   const handlePrint = () => {
     window.print();
@@ -32,27 +55,27 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-[#c5c5d3]/50 flex flex-col max-h-[92vh] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl border border-[#c5c5d3]/50 dark:border-slate-800 flex flex-col max-h-[92vh] overflow-hidden animate-in fade-in zoom-in-95 duration-150 transition-colors">
         {/* Header bar */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#e5eeff] bg-[#f8f9ff]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#e5eeff] dark:border-slate-800 bg-[#f8f9ff] dark:bg-slate-800/80">
           <div className="flex items-center gap-2.5">
-            <span className="material-symbols-outlined text-[#00236f] text-xl">receipt_long</span>
+            <span className="material-symbols-outlined text-[#00236f] dark:text-blue-400 text-xl">receipt_long</span>
             <div>
-              <h3 className="font-bold text-sm text-[#00236f]">Receipt Preview</h3>
-              <p className="text-[11px] text-[#757682]">{order.receiptNumber}</p>
+              <h3 className="font-bold text-sm text-[#00236f] dark:text-blue-300">Receipt Preview</h3>
+              <p className="text-[11px] text-[#757682] dark:text-slate-400">{order.receiptNumber}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[#757682] hover:bg-[#e5eeff]"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[#757682] dark:text-slate-400 hover:bg-[#e5eeff] dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-lg">close</span>
           </button>
         </div>
 
-        {/* Printable Thermal Receipt Card */}
-        <div className="flex-1 overflow-y-auto p-5 bg-[#f1f3f4]">
+        {/* Printable Thermal Receipt Card container */}
+        <div className="flex-1 overflow-y-auto p-5 bg-[#f1f3f4] dark:bg-slate-950">
           <div
             id="printable-receipt"
             className="bg-white p-6 rounded-lg shadow-sm border border-dashed border-[#c5c5d3] font-mono text-xs text-[#0b1c30] max-w-sm mx-auto"
@@ -172,29 +195,62 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="p-4 border-t border-[#e5eeff] bg-white flex items-center justify-between gap-2">
-          {onRefund && order.status === 'completed' && (
+        <div className="p-4 border-t border-[#e5eeff] dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 transition-colors">
+          <div className="flex items-center gap-2">
+            {onRefund && order.status === 'completed' && (
+              <button
+                onClick={() => onRefund(order.id)}
+                className="px-3.5 h-10 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 text-xs font-semibold rounded-full flex items-center gap-1 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[16px]">undo</span>
+                Refund
+              </button>
+            )}
+            {btStatusMsg && (
+              <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 animate-in fade-in">
+                {btStatusMsg}
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 ml-auto flex-wrap">
+            {/* Direct Bluetooth Mini Printer Action */}
             <button
-              onClick={() => onRefund(order.id)}
-              className="px-3.5 h-10 border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold rounded-full flex items-center gap-1"
+              type="button"
+              onClick={isConnected ? handleBtPrint : openPrinterModal}
+              disabled={isSendingBt}
+              className={`px-4 h-10 text-xs font-bold rounded-full transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${
+                isConnected
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                  : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[#00236f] dark:text-blue-300 border border-slate-300 dark:border-slate-700'
+              }`}
             >
-              <span className="material-symbols-outlined text-[16px]">undo</span>
-              Refund
+              <span className="material-symbols-outlined text-[17px]">
+                {isConnected ? 'bluetooth_connected' : 'bluetooth'}
+              </span>
+              <span>
+                {isSendingBt
+                  ? 'Mengirim...'
+                  : isConnected
+                  ? 'Cetak Mini Printer BT'
+                  : 'Hubungkan Printer BT'}
+              </span>
             </button>
-          )}
-          <div className="flex items-center gap-2 ml-auto">
-            <button
-              onClick={onClose}
-              className="px-4 h-10 text-xs font-semibold text-[#444651] hover:bg-[#eff4ff] rounded-full"
-            >
-              Done
-            </button>
+
             <button
               onClick={handlePrint}
-              className="px-5 h-10 bg-[#00236f] hover:bg-[#1e3a8a] text-white text-xs font-bold rounded-full shadow-sm flex items-center gap-1.5"
+              className="px-4 h-10 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-full transition-colors flex items-center gap-1.5 cursor-pointer"
+              title="Cetak via dialog browser standar / PDF"
             >
               <span className="material-symbols-outlined text-[16px]">print</span>
-              Print Receipt
+              <span>Browser Print</span>
+            </button>
+
+            <button
+              onClick={onClose}
+              className="px-4 h-10 text-xs font-semibold text-[#444651] dark:text-slate-300 hover:bg-[#eff4ff] dark:hover:bg-slate-800 rounded-full cursor-pointer transition-colors"
+            >
+              Done
             </button>
           </div>
         </div>

@@ -10,6 +10,7 @@ export const INITIAL_SETTINGS: StoreSettings = {
   lowStockThreshold: 15,
   receiptFooter: 'Thank you for supporting your local stationery craft shop!',
   enableSound: true,
+  themeMode: 'system',
 };
 
 export const INITIAL_PRODUCTS: Product[] = [

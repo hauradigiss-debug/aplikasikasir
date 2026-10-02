@@ -19,6 +19,7 @@ import {
   Sparkles,
   ShieldAlert,
 } from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
 
 interface SuperAdminSecurityViewProps {
   users: User[];
@@ -371,28 +372,31 @@ export const SuperAdminSecurityView: React.FC<SuperAdminSecurityViewProps> = ({
   return (
     <div className="w-full max-w-6xl space-y-8 pb-16">
       {/* Top Banner Header */}
-      <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-xs relative overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-xs relative overflow-hidden transition-colors">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#00236f] text-xs font-bold uppercase tracking-wider">
-              <ShieldCheck className="w-4 h-4 text-[#00236f]" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-[#00236f] dark:text-blue-300 text-xs font-bold uppercase tracking-wider">
+              <ShieldCheck className="w-4 h-4 text-[#00236f] dark:text-blue-400" />
               <span>SUPER ADMIN PRIVILEGED ACCESS</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#0b1c30] dark:text-slate-100 tracking-tight">
               Manajemen Kredensial & CRUD Password Super Admin
             </h1>
-            <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
+            <p className="text-sm text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
               Pusat kendali otoritas tertinggi untuk mengelola kata sandi akun Super Admin,
               menambah administrator baru, melakukan reset instan, dan memantau sinkronisasi database Turso Cloud.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 shrink-0">
+            {/* Quick Theme Switcher */}
+            <ThemeToggle variant="compact" />
+
             <button
               type="button"
               onClick={handlePingTurso}
               disabled={isPinging}
-              className="px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
+              className="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isPinging ? 'animate-spin' : ''}`} />
               <span>{isPinging ? 'Menguji...' : 'Uji Database Turso'}</span>
@@ -401,7 +405,7 @@ export const SuperAdminSecurityView: React.FC<SuperAdminSecurityViewProps> = ({
             <button
               type="button"
               onClick={() => setShowAddAdminModal(true)}
-              className="px-5 py-2.5 rounded-xl bg-[#00236f] hover:bg-[#12398c] text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-[0.98]"
+              className="px-5 py-2.5 rounded-xl bg-[#00236f] dark:bg-blue-600 hover:bg-[#12398c] dark:hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-[0.98]"
             >
               <UserPlus className="w-4 h-4" />
               <span>Tambah Super Admin Baru</span>
@@ -414,8 +418,8 @@ export const SuperAdminSecurityView: React.FC<SuperAdminSecurityViewProps> = ({
           <div
             className={`mt-4 p-3 rounded-xl text-xs flex items-center justify-between border ${
               tursoStatus.connected
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                : 'bg-red-50 text-red-800 border-red-200'
+                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                : 'bg-red-50 dark:bg-red-950/60 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800'
             }`}
           >
             <div className="flex items-center gap-2 font-medium">
@@ -439,48 +443,48 @@ export const SuperAdminSecurityView: React.FC<SuperAdminSecurityViewProps> = ({
 
       {/* Grid: Stats Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between transition-colors">
           <div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Super Admin Aktif</p>
-            <h3 className="text-2xl font-bold text-[#00236f] mt-1">{superAdmins.length} Akun</h3>
-            <p className="text-[11px] text-slate-500 mt-0.5">Memiliki akses penuh POS</p>
+            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Super Admin Aktif</p>
+            <h3 className="text-2xl font-bold text-[#00236f] dark:text-blue-300 mt-1">{superAdmins.length} Akun</h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Memiliki akses penuh POS</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-[#00236f] flex items-center justify-center border border-blue-100">
+          <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#00236f] dark:text-blue-400 flex items-center justify-center border border-blue-100 dark:border-blue-900">
             <ShieldCheck className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between transition-colors">
           <div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Login Saat Ini</p>
-            <h3 className="text-xl font-bold text-emerald-700 mt-1 truncate max-w-[130px]">
+            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Login Saat Ini</p>
+            <h3 className="text-xl font-bold text-emerald-700 dark:text-emerald-400 mt-1 truncate max-w-[130px]">
               @{currentUser?.username || 'haura'}
             </h3>
-            <p className="text-[11px] text-emerald-600 font-semibold mt-0.5">Sesi Terverifikasi</p>
+            <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">Sesi Terverifikasi</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100">
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-900">
             <Lock className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between transition-colors">
           <div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Metode Enkripsi</p>
-            <h3 className="text-lg font-bold text-slate-800 mt-1">ACID SQLite</h3>
-            <p className="text-[11px] text-slate-500 mt-0.5">Turso Distributed SQL</p>
+            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Metode Enkripsi</p>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mt-1">ACID SQLite</h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Turso Distributed SQL</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center border border-purple-100">
+          <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 flex items-center justify-center border border-purple-100 dark:border-purple-900">
             <KeyRound className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between transition-colors">
           <div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Staf / Kasir</p>
-            <h3 className="text-2xl font-bold text-slate-800 mt-1">{otherUsers.length} Pengguna</h3>
-            <p className="text-[11px] text-slate-500 mt-0.5">Kasir & Manajer Toko</p>
+            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Staf / Kasir</p>
+            <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mt-1">{otherUsers.length} Pengguna</h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Kasir & Manajer Toko</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center border border-slate-200">
+          <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center border border-slate-200 dark:border-slate-700">
             <History className="w-6 h-6" />
           </div>
         </div>

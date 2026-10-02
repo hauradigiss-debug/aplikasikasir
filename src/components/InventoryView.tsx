@@ -82,8 +82,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
       {/* Header & Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight">Inventory</h1>
-          <p className="text-sm sm:text-base text-[#444651] mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#0b1c30] dark:text-slate-100 tracking-tight">Inventory</h1>
+          <p className="text-sm sm:text-base text-[#444651] dark:text-slate-400 mt-1">
             Manage your products, stock, and pricing.
           </p>
         </div>
@@ -91,7 +91,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           <button
             type="button"
             onClick={() => setIsBarcodeSheetOpen(true)}
-            className="bg-white hover:bg-slate-50 text-[#00236f] border border-[#c5c5d3] font-medium text-sm h-[44px] px-4 rounded-full active:scale-95 transition-all shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer"
+            className="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-[#00236f] dark:text-blue-300 border border-[#c5c5d3] dark:border-slate-700 font-medium text-sm h-[44px] px-4 rounded-full active:scale-95 transition-all shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer"
             title="Lihat dan Cetak Lembar Barcode Produk"
           >
             <span className="material-symbols-outlined text-[20px]">barcode_scanner</span>
@@ -99,7 +99,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           </button>
           <button
             onClick={onAddProduct}
-            className="bg-[#00236f] hover:bg-[#1e3a8a] text-white font-medium text-sm h-[44px] px-6 rounded-full active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
+            className="bg-[#00236f] dark:bg-blue-600 hover:bg-[#1e3a8a] dark:hover:bg-blue-700 text-white font-medium text-sm h-[44px] px-6 rounded-full active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto"
           >
             <span className="material-symbols-outlined text-[20px]">add</span>
             Add Product
@@ -113,14 +113,14 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           onClick={() => { setStockFilter('all'); setSelectedCategory('All Items'); }}
           className={`p-3 rounded-xl border transition-all cursor-pointer ${
             stockFilter === 'all' && selectedCategory === 'All Items'
-              ? 'bg-[#eff4ff] border-[#1e3a8a] shadow-xs'
-              : 'bg-white border-[#c5c5d3]/50 hover:bg-[#f8f9ff]'
+              ? 'bg-[#eff4ff] dark:bg-blue-950/60 border-[#1e3a8a] dark:border-blue-500 shadow-xs'
+              : 'bg-white dark:bg-slate-900 border-[#c5c5d3]/50 dark:border-slate-800 hover:bg-[#f8f9ff] dark:hover:bg-slate-800'
           }`}
         >
-          <p className="text-xs font-semibold text-[#757682] uppercase">Total Catalog</p>
+          <p className="text-xs font-semibold text-[#757682] dark:text-slate-400 uppercase">Total Catalog</p>
           <div className="flex items-baseline justify-between mt-1">
-            <span className="text-xl font-bold text-[#00236f]">{totalProducts}</span>
-            <span className="text-xs text-[#444651]">items</span>
+            <span className="text-xl font-bold text-[#00236f] dark:text-blue-300">{totalProducts}</span>
+            <span className="text-xs text-[#444651] dark:text-slate-400">items</span>
           </div>
         </div>
 
@@ -128,14 +128,14 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           onClick={() => setStockFilter('in_stock')}
           className={`p-3 rounded-xl border transition-all cursor-pointer ${
             stockFilter === 'in_stock'
-              ? 'bg-[#e6f4ea] border-[#137333] shadow-xs'
-              : 'bg-white border-[#c5c5d3]/50 hover:bg-[#f8f9ff]'
+              ? 'bg-[#e6f4ea] dark:bg-emerald-950/60 border-[#137333] dark:border-emerald-600 shadow-xs'
+              : 'bg-white dark:bg-slate-900 border-[#c5c5d3]/50 dark:border-slate-800 hover:bg-[#f8f9ff] dark:hover:bg-slate-800'
           }`}
         >
-          <p className="text-xs font-semibold text-[#137333] uppercase">In Stock</p>
+          <p className="text-xs font-semibold text-[#137333] dark:text-emerald-400 uppercase">In Stock</p>
           <div className="flex items-baseline justify-between mt-1">
-            <span className="text-xl font-bold text-[#137333]">{inStockCount}</span>
-            <span className="text-xs text-[#137333]">healthy</span>
+            <span className="text-xl font-bold text-[#137333] dark:text-emerald-400">{inStockCount}</span>
+            <span className="text-xs text-[#137333] dark:text-emerald-400">healthy</span>
           </div>
         </div>
 
@@ -143,14 +143,14 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           onClick={() => setStockFilter('low_stock')}
           className={`p-3 rounded-xl border transition-all cursor-pointer ${
             stockFilter === 'low_stock'
-              ? 'bg-[#fef7e0] border-[#b06000] shadow-xs'
-              : 'bg-white border-[#c5c5d3]/50 hover:bg-[#f8f9ff]'
+              ? 'bg-[#fef7e0] dark:bg-amber-950/60 border-[#b06000] dark:border-amber-600 shadow-xs'
+              : 'bg-white dark:bg-slate-900 border-[#c5c5d3]/50 dark:border-slate-800 hover:bg-[#f8f9ff] dark:hover:bg-slate-800'
           }`}
         >
-          <p className="text-xs font-semibold text-[#b06000] uppercase">Low Stock</p>
+          <p className="text-xs font-semibold text-[#b06000] dark:text-amber-400 uppercase">Low Stock</p>
           <div className="flex items-baseline justify-between mt-1">
-            <span className="text-xl font-bold text-[#b06000]">{lowStockCount}</span>
-            <span className="text-xs text-[#b06000]">need restock</span>
+            <span className="text-xl font-bold text-[#b06000] dark:text-amber-400">{lowStockCount}</span>
+            <span className="text-xs text-[#b06000] dark:text-amber-400">need restock</span>
           </div>
         </div>
 
@@ -158,14 +158,14 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           onClick={() => setStockFilter('out_of_stock')}
           className={`p-3 rounded-xl border transition-all cursor-pointer ${
             stockFilter === 'out_of_stock'
-              ? 'bg-[#f1f3f4] border-[#5f6368] shadow-xs'
-              : 'bg-white border-[#c5c5d3]/50 hover:bg-[#f8f9ff]'
+              ? 'bg-[#f1f3f4] dark:bg-slate-800 border-[#5f6368] dark:border-slate-500 shadow-xs'
+              : 'bg-white dark:bg-slate-900 border-[#c5c5d3]/50 dark:border-slate-800 hover:bg-[#f8f9ff] dark:hover:bg-slate-800'
           }`}
         >
-          <p className="text-xs font-semibold text-[#5f6368] uppercase">Out of Stock</p>
+          <p className="text-xs font-semibold text-[#5f6368] dark:text-slate-400 uppercase">Out of Stock</p>
           <div className="flex items-baseline justify-between mt-1">
-            <span className="text-xl font-bold text-[#ba1a1a]">{outOfStockCount}</span>
-            <span className="text-xs text-red-600">depleted</span>
+            <span className="text-xl font-bold text-[#ba1a1a] dark:text-rose-400">{outOfStockCount}</span>
+            <span className="text-xs text-red-600 dark:text-rose-400">depleted</span>
           </div>
         </div>
       </div>
@@ -173,7 +173,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
       {/* Filters & Search */}
       <div className="flex flex-col md:flex-row gap-3 mb-6">
         <div className="relative flex-1">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#757682]">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#757682] dark:text-slate-400">
             search
           </span>
           <input
@@ -181,12 +181,12 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search SKU or product name..."
-            className="w-full h-[44px] pl-10 pr-10 bg-white border border-[#c5c5d3] rounded-lg text-sm text-[#0b1c30] focus:border-[#00236f] focus:ring-1 focus:ring-[#00236f] outline-none transition-all placeholder:text-[#757682]"
+            className="w-full h-[44px] pl-10 pr-10 bg-white dark:bg-slate-900 border border-[#c5c5d3] dark:border-slate-700 rounded-lg text-sm text-[#0b1c30] dark:text-slate-100 focus:border-[#00236f] dark:focus:border-blue-400 focus:ring-1 focus:ring-[#00236f] outline-none transition-all placeholder:text-[#757682] dark:placeholder:text-slate-500"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#757682] hover:text-[#0b1c30]"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#757682] dark:text-slate-400 hover:text-[#0b1c30] dark:hover:text-white"
             >
               <span className="material-symbols-outlined text-lg">close</span>
             </button>
@@ -198,8 +198,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
             onClick={() => setSelectedCategory('All Items')}
             className={`whitespace-nowrap px-4 h-[44px] rounded-full text-sm font-medium border transition-colors cursor-pointer ${
               selectedCategory === 'All Items'
-                ? 'bg-[#00236f] text-white border-[#00236f]'
-                : 'bg-white text-[#444651] hover:bg-[#d3e4fe] border-[#c5c5d3]'
+                ? 'bg-[#00236f] dark:bg-blue-600 text-white border-[#00236f] dark:border-blue-600'
+                : 'bg-white dark:bg-slate-900 text-[#444651] dark:text-slate-300 hover:bg-[#d3e4fe] dark:hover:bg-slate-800 border-[#c5c5d3] dark:border-slate-700'
             }`}
           >
             All Items
@@ -211,8 +211,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               onClick={() => setSelectedCategory(cat)}
               className={`whitespace-nowrap px-4 h-[44px] rounded-full text-sm font-medium border transition-colors cursor-pointer ${
                 selectedCategory === cat
-                  ? 'bg-[#00236f] text-white border-[#00236f]'
-                  : 'bg-white text-[#444651] hover:bg-[#d3e4fe] border-[#c5c5d3]'
+                  ? 'bg-[#00236f] dark:bg-blue-600 text-white border-[#00236f] dark:border-blue-600'
+                  : 'bg-white dark:bg-slate-900 text-[#444651] dark:text-slate-300 hover:bg-[#d3e4fe] dark:hover:bg-slate-800 border-[#c5c5d3] dark:border-slate-700'
               }`}
             >
               {cat}
@@ -223,8 +223,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
             onClick={() => setShowMoreFilters(!showMoreFilters)}
             className={`whitespace-nowrap px-4 h-[44px] rounded-full text-sm font-medium border transition-colors flex items-center gap-1 cursor-pointer ${
               showMoreFilters || stockFilter !== 'all'
-                ? 'bg-[#1e3a8a] text-white border-[#1e3a8a]'
-                : 'bg-white text-[#444651] hover:bg-[#d3e4fe] border-[#c5c5d3]'
+                ? 'bg-[#1e3a8a] dark:bg-blue-700 text-white border-[#1e3a8a] dark:border-blue-700'
+                : 'bg-white dark:bg-slate-900 text-[#444651] dark:text-slate-300 hover:bg-[#d3e4fe] dark:hover:bg-slate-800 border-[#c5c5d3] dark:border-slate-700'
             }`}
           >
             <span className="material-symbols-outlined text-[18px]">filter_list</span>
@@ -235,9 +235,9 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
       {/* Expanded Filters Drawer */}
       {showMoreFilters && (
-        <div className="p-4 bg-white rounded-xl border border-[#c5c5d3]/70 mb-6 shadow-sm flex flex-wrap items-center justify-between gap-4 animate-in fade-in duration-150">
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-[#c5c5d3]/70 dark:border-slate-800 mb-6 shadow-sm flex flex-wrap items-center justify-between gap-4 animate-in fade-in duration-150 transition-colors">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-xs font-bold text-[#0b1c30] uppercase">Stock Status:</span>
+            <span className="text-xs font-bold text-[#0b1c30] dark:text-slate-200 uppercase">Stock Status:</span>
             <div className="flex gap-1.5 flex-wrap">
               {[
                 { id: 'all', label: 'All Status' },
@@ -248,10 +248,10 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                 <button
                   key={st.id}
                   onClick={() => setStockFilter(st.id as StockFilter)}
-                  className={`text-xs px-3 py-1.5 rounded-md font-medium border transition-all ${
+                  className={`text-xs px-3 py-1.5 rounded-md font-medium border transition-all cursor-pointer ${
                     stockFilter === st.id
-                      ? 'bg-[#00236f] text-white border-[#00236f]'
-                      : 'bg-[#f8f9ff] text-[#444651] border-[#c5c5d3] hover:bg-[#eff4ff]'
+                      ? 'bg-[#00236f] dark:bg-blue-600 text-white border-[#00236f] dark:border-blue-600'
+                      : 'bg-[#f8f9ff] dark:bg-slate-800 text-[#444651] dark:text-slate-300 border-[#c5c5d3] dark:border-slate-700 hover:bg-[#eff4ff] dark:hover:bg-slate-700'
                   }`}
                 >
                   {st.label}
@@ -261,11 +261,11 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-[#0b1c30] uppercase">Sort By:</span>
+            <span className="text-xs font-bold text-[#0b1c30] dark:text-slate-200 uppercase">Sort By:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="h-9 px-3 bg-[#f8f9ff] border border-[#c5c5d3] rounded-lg text-xs font-medium text-[#0b1c30] focus:border-[#00236f] outline-none"
+              className="h-9 px-3 bg-[#f8f9ff] dark:bg-slate-800 border border-[#c5c5d3] dark:border-slate-700 rounded-lg text-xs font-medium text-[#0b1c30] dark:text-slate-200 focus:border-[#00236f] dark:focus:border-blue-400 outline-none"
             >
               <option value="name_asc">Name (A-Z)</option>
               <option value="name_desc">Name (Z-A)</option>
@@ -280,9 +280,9 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
       {/* Active Filter Notice if non-empty */}
       {(searchQuery || selectedCategory !== 'All Items' || stockFilter !== 'all') && (
-        <div className="flex items-center justify-between mb-4 px-1 text-xs text-[#757682]">
+        <div className="flex items-center justify-between mb-4 px-1 text-xs text-[#757682] dark:text-slate-400">
           <span>
-            Showing <strong className="text-[#0b1c30]">{filteredProducts.length}</strong> of {products.length} products
+            Showing <strong className="text-[#0b1c30] dark:text-slate-200">{filteredProducts.length}</strong> of {products.length} products
           </span>
           <button
             onClick={() => {
@@ -290,7 +290,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               setSelectedCategory('All Items');
               setStockFilter('all');
             }}
-            className="text-[#00236f] font-semibold hover:underline"
+            className="text-[#00236f] dark:text-blue-400 font-semibold hover:underline cursor-pointer"
           >
             Clear all filters
           </button>
@@ -308,24 +308,24 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
             return (
               <div
                 key={product.id}
-                className={`bg-white border border-[#c5c5d3]/70 rounded-xl p-4 flex flex-col gap-2 hover:border-[#00236f] hover:shadow-md transition-all group relative ${
+                className={`bg-white dark:bg-slate-900 border border-[#c5c5d3]/70 dark:border-slate-800 rounded-xl p-4 flex flex-col gap-2 hover:border-[#00236f] dark:hover:border-blue-500 hover:shadow-md transition-all group relative ${
                   isOutOfStock ? 'opacity-80' : ''
                 }`}
               >
                 {/* Top Status & Hover Actions */}
                 <div className="flex justify-between items-start mb-1">
                   {isInStock && (
-                    <span className="bg-[#e6f4ea] text-[#137333] px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase">
+                    <span className="bg-[#e6f4ea] dark:bg-emerald-950/80 text-[#137333] dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase">
                       In Stock
                     </span>
                   )}
                   {isLowStock && (
-                    <span className="bg-[#fef7e0] text-[#b06000] px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase animate-pulse">
+                    <span className="bg-[#fef7e0] dark:bg-amber-950/80 text-[#b06000] dark:text-amber-300 border border-amber-200 dark:border-amber-800 px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase animate-pulse">
                       Low Stock
                     </span>
                   )}
                   {isOutOfStock && (
-                    <span className="bg-[#f1f3f4] text-[#5f6368] px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase">
+                    <span className="bg-[#f1f3f4] dark:bg-slate-800 text-[#5f6368] dark:text-slate-400 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase">
                       Out of Stock
                     </span>
                   )}
@@ -335,14 +335,14 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                     <button
                       onClick={() => onOpenStockAdjust(product)}
                       title="Adjust Stock"
-                      className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#eff4ff] text-[#00236f] transition-colors"
+                      className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#eff4ff] dark:hover:bg-slate-800 text-[#00236f] dark:text-blue-300 transition-colors cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[18px]">swap_vert</span>
                     </button>
                     <button
                       onClick={() => onEditProduct(product)}
                       title="Edit Product"
-                      className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#d3e4fe] text-[#444651] transition-colors"
+                      className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#d3e4fe] dark:hover:bg-slate-800 text-[#444651] dark:text-slate-300 transition-colors cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[18px]">edit</span>
                     </button>
@@ -353,7 +353,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                         }
                       }}
                       title="Delete Product"
-                      className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#ffdad6] text-[#ba1a1a] transition-colors"
+                      className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#ffdad6] dark:hover:bg-rose-950/60 text-[#ba1a1a] dark:text-rose-400 transition-colors cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[18px]">delete</span>
                     </button>
@@ -362,11 +362,11 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
                 {/* Product Visual Box */}
                 <div
-                  className={`h-36 sm:h-32 w-full bg-[#dbeafe]/70 rounded-xl mb-1 relative overflow-hidden flex items-center justify-center border border-[#c5c5d3]/30 transition-transform ${
+                  className={`h-36 sm:h-32 w-full bg-[#dbeafe]/70 dark:bg-slate-800/80 rounded-xl mb-1 relative overflow-hidden flex items-center justify-center border border-[#c5c5d3]/30 dark:border-slate-700/50 transition-transform ${
                     isOutOfStock ? 'grayscale opacity-60' : ''
                   }`}
                 >
-                  <span className="material-symbols-outlined text-[#1e3a8a] text-4xl opacity-80 group-hover:scale-110 transition-transform duration-200">
+                  <span className="material-symbols-outlined text-[#1e3a8a] dark:text-blue-300 text-4xl opacity-80 group-hover:scale-110 transition-transform duration-200">
                     {product.icon || 'inventory_2'}
                   </span>
                 </div>
@@ -374,30 +374,30 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                 {/* Product Details */}
                 <div className="space-y-0.5">
                   <h3
-                    className={`font-bold text-base sm:text-lg text-[#0b1c30] line-clamp-1 group-hover:text-[#00236f] transition-colors ${
-                      isOutOfStock ? 'text-[#444651]' : ''
+                    className={`font-bold text-base sm:text-lg text-[#0b1c30] dark:text-slate-100 line-clamp-1 group-hover:text-[#00236f] dark:group-hover:text-blue-300 transition-colors ${
+                      isOutOfStock ? 'text-[#444651] dark:text-slate-500' : ''
                     }`}
                     title={product.name}
                   >
                     {product.name}
                   </h3>
-                  <p className="text-xs text-[#757682] font-mono tracking-tight">
+                  <p className="text-xs text-[#757682] dark:text-slate-400 font-mono tracking-tight">
                     SKU: {product.sku}
                   </p>
                 </div>
 
                 {/* Price & Unit Count */}
-                <div className="flex justify-between items-baseline mt-auto pt-3 border-t border-[#c5c5d3]/40">
-                  <span className="text-xl font-bold text-[#00236f] tracking-tight leading-none">
+                <div className="flex justify-between items-baseline mt-auto pt-3 border-t border-[#c5c5d3]/40 dark:border-slate-800">
+                  <span className="text-xl font-bold text-[#00236f] dark:text-blue-300 tracking-tight leading-none">
                     {formatCurrency(product.price, settings.currencySymbol)}
                   </span>
                   <span
                     className={`text-sm ${
                       isLowStock
-                        ? 'text-[#ba1a1a] font-bold'
+                        ? 'text-[#ba1a1a] dark:text-amber-400 font-bold'
                         : isOutOfStock
-                        ? 'text-[#757682] font-medium'
-                        : 'text-[#444651] font-medium'
+                        ? 'text-[#757682] dark:text-slate-500 font-medium'
+                        : 'text-[#444651] dark:text-slate-400 font-medium'
                     }`}
                   >
                     {product.stock} units
@@ -409,12 +409,12 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
         </div>
       ) : (
         /* Empty State */
-        <div className="flex flex-col items-center justify-center py-16 px-4 text-center border-2 border-dashed border-[#c5c5d3] rounded-2xl bg-white mt-4">
-          <div className="w-20 h-20 rounded-full bg-[#f8f9ff] flex items-center justify-center mb-4 text-[#757682]/60">
+        <div className="flex flex-col items-center justify-center py-16 px-4 text-center border-2 border-dashed border-[#c5c5d3] dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900 mt-4 transition-colors">
+          <div className="w-20 h-20 rounded-full bg-[#f8f9ff] dark:bg-slate-800 flex items-center justify-center mb-4 text-[#757682]/60 dark:text-slate-500">
             <span className="material-symbols-outlined text-5xl">inventory_2</span>
           </div>
-          <h2 className="text-lg font-bold text-[#0b1c30] mb-1">No products found</h2>
-          <p className="text-sm text-[#444651] mb-6 max-w-sm">
+          <h2 className="text-lg font-bold text-[#0b1c30] dark:text-slate-100 mb-1">No products found</h2>
+          <p className="text-sm text-[#444651] dark:text-slate-400 mb-6 max-w-sm">
             {searchQuery || selectedCategory !== 'All Items' || stockFilter !== 'all'
               ? 'No stationery items match your current filters. Try resetting the search or filters.'
               : 'Your inventory is currently empty. Add products to start managing stock and selling in the POS.'}
@@ -426,14 +426,14 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                 setSelectedCategory('All Items');
                 setStockFilter('all');
               }}
-              className="bg-[#eff4ff] text-[#00236f] font-semibold text-sm h-[44px] px-6 rounded-full hover:bg-[#d3e4fe] transition-colors"
+              className="bg-[#eff4ff] dark:bg-slate-800 text-[#00236f] dark:text-blue-300 font-semibold text-sm h-[44px] px-6 rounded-full hover:bg-[#d3e4fe] dark:hover:bg-slate-700 transition-colors cursor-pointer"
             >
               Reset Filters
             </button>
           ) : (
             <button
               onClick={onAddProduct}
-              className="bg-[#00236f] text-white font-semibold text-sm h-[44px] px-6 rounded-full hover:bg-[#1e3a8a] active:scale-95 transition-all shadow-sm flex items-center gap-2"
+              className="bg-[#00236f] dark:bg-blue-600 text-white font-semibold text-sm h-[44px] px-6 rounded-full hover:bg-[#1e3a8a] dark:hover:bg-blue-700 active:scale-95 transition-all shadow-sm flex items-center gap-2 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>
               Add First Product

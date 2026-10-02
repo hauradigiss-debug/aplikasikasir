@@ -14,6 +14,7 @@ import { SuperAdminSecurityView } from './components/SuperAdminSecurityView';
 import { ProductModal } from './components/ProductModal';
 import { StockAdjustModal } from './components/StockAdjustModal';
 import { ReceiptModal } from './components/ReceiptModal';
+import { BluetoothPrinterModal } from './components/BluetoothPrinterModal';
 import { LoginView } from './components/LoginView';
 
 const DEFAULT_CATEGORIES: CategoryType[] = [
@@ -387,7 +388,7 @@ export default function App() {
   }
 
   return (
-    <div className="bg-[#f8f9ff] text-[#0b1c30] min-h-screen flex flex-col md:flex-row pb-20 md:pb-0 pt-16 md:pt-0 selection:bg-[#d3e4fe]">
+    <div className="bg-[#f8f9ff] dark:bg-slate-950 text-[#0b1c30] dark:text-slate-100 min-h-screen flex flex-col md:flex-row pb-20 md:pb-0 pt-16 md:pt-0 selection:bg-[#d3e4fe] dark:selection:bg-blue-900 transition-colors duration-200">
       {/* Navigation (Sidebar Desktop & Top/Bottom Bar Mobile) */}
       <NavigationDrawer
         activeTab={activeTab}
@@ -399,7 +400,7 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-72 lg:ml-80 p-4 sm:p-6 lg:p-8 bg-[#f8f9ff] min-h-screen overflow-y-auto">
+      <main className="flex-1 md:ml-72 lg:ml-80 p-4 sm:p-6 lg:p-8 bg-[#f8f9ff] dark:bg-slate-950 min-h-screen overflow-y-auto transition-colors duration-200">
         <div className="max-w-7xl mx-auto">
           {activeTab === 'products' && (
             <InventoryView
@@ -428,10 +429,10 @@ export default function App() {
 
           {activeTab === 'members' && (
             <div className="space-y-6">
-              <div className="bg-white rounded-2xl p-6 border border-[#c5c5d3]/70 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-[#c5c5d3]/70 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors">
                 <div>
-                  <h1 className="text-2xl font-bold text-[#0b1c30]">Member Loyalty Management</h1>
-                  <p className="text-xs text-[#757682] mt-0.5">
+                  <h1 className="text-2xl font-bold text-[#0b1c30] dark:text-slate-100">Member Loyalty Management</h1>
+                  <p className="text-xs text-[#757682] dark:text-slate-400 mt-0.5">
                     Data keanggotaan pelanggan, poin belanja, dan barcode digital tersinkron dengan database Turso.
                   </p>
                 </div>
@@ -450,7 +451,7 @@ export default function App() {
                       });
                     }
                   }}
-                  className="px-4 py-2.5 bg-[#00236f] hover:bg-[#12398c] text-white text-xs font-semibold rounded-xl flex items-center gap-2 cursor-pointer shadow-xs"
+                  className="px-4 py-2.5 bg-[#00236f] dark:bg-blue-600 hover:bg-[#12398c] dark:hover:bg-blue-700 text-white text-xs font-semibold rounded-xl flex items-center gap-2 cursor-pointer shadow-xs transition-colors"
                 >
                   <span className="material-symbols-outlined text-base">badge</span>
                   <span>Buka Portal Member</span>
@@ -462,41 +463,41 @@ export default function App() {
                 {members.map((m) => (
                   <div
                     key={m.id}
-                    className="bg-white rounded-2xl p-5 border border-[#c5c5d3]/70 shadow-xs hover:border-[#00236f]/40 transition-colors flex flex-col justify-between"
+                    className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-[#c5c5d3]/70 dark:border-slate-800 shadow-xs hover:border-[#00236f]/40 dark:hover:border-blue-500/40 transition-colors flex flex-col justify-between"
                   >
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase bg-amber-100 text-amber-900 border border-amber-300">
+                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-md uppercase bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-800">
                           {m.tier} Member
                         </span>
-                        <span className="text-xs font-bold text-emerald-700">
+                        <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
                           {Math.round(m.discountRate * 100)}% Diskon
                         </span>
                       </div>
 
-                      <h3 className="font-bold text-base text-[#0b1c30]">{m.fullName}</h3>
-                      <p className="text-xs text-slate-500 font-mono mt-0.5">@{m.username}</p>
+                      <h3 className="font-bold text-base text-[#0b1c30] dark:text-slate-100">{m.fullName}</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">@{m.username}</p>
 
-                      <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-200/70 text-xs space-y-1">
+                      <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-800/70 rounded-xl border border-slate-200/70 dark:border-slate-700/60 text-xs space-y-1">
                         <div className="flex justify-between">
-                          <span className="text-slate-500">Kode Member:</span>
-                          <span className="font-mono font-bold text-[#00236f]">{m.memberCode}</span>
+                          <span className="text-slate-500 dark:text-slate-400">Kode Member:</span>
+                          <span className="font-mono font-bold text-[#00236f] dark:text-blue-300">{m.memberCode}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-500">Poin Hadiah:</span>
-                          <span className="font-bold text-amber-700">{m.points} Pts</span>
+                          <span className="text-slate-500 dark:text-slate-400">Poin Hadiah:</span>
+                          <span className="font-bold text-amber-700 dark:text-amber-400">{m.points} Pts</span>
                         </div>
                         {m.phone && (
                           <div className="flex justify-between">
-                            <span className="text-slate-500">No. WhatsApp:</span>
-                            <span className="font-mono text-slate-700">{m.phone}</span>
+                            <span className="text-slate-500 dark:text-slate-400">No. WhatsApp:</span>
+                            <span className="font-mono text-slate-700 dark:text-slate-300">{m.phone}</span>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-[11px] text-slate-400">Barcode aktif di Kasir</span>
+                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                      <span className="text-[11px] text-slate-400 dark:text-slate-500">Barcode aktif di Kasir</span>
                       <button
                         type="button"
                         onClick={() => {
@@ -509,7 +510,7 @@ export default function App() {
                             memberData: m,
                           });
                         }}
-                        className="text-xs font-bold text-[#00236f] hover:underline cursor-pointer flex items-center gap-1"
+                        className="text-xs font-bold text-[#00236f] dark:text-blue-400 hover:underline cursor-pointer flex items-center gap-1"
                       >
                         <span>Lihat Kartu</span>
                         <span className="material-symbols-outlined text-sm">arrow_forward</span>
@@ -600,6 +601,9 @@ export default function App() {
         settings={settings}
         onRefund={handleRefundOrder}
       />
+
+      {/* Global Bluetooth Mini Printer Manager Modal */}
+      <BluetoothPrinterModal settings={settings} />
     </div>
   );
 }

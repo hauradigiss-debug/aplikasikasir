@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, Member } from '../types';
 import { api } from '../services/api';
+import { ThemeToggle } from './ThemeToggle';
 
 interface LoginViewProps {
   users: User[];
@@ -239,32 +240,34 @@ export const LoginView: React.FC<LoginViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#f4f6fb] flex flex-col justify-between items-center p-3 sm:p-6 lg:p-8 selection:bg-[#d3e4fe]">
+    <div className="min-h-screen w-full bg-[#f4f6fb] dark:bg-slate-950 flex flex-col justify-between items-center p-3 sm:p-6 lg:p-8 selection:bg-[#d3e4fe] dark:selection:bg-blue-900 transition-colors duration-200">
       {/* Top Header Bar */}
-      <header className="w-full max-w-5xl flex items-center justify-between pb-4 border-b border-[#d8dce6]">
+      <header className="w-full max-w-5xl flex items-center justify-between pb-4 border-b border-[#d8dce6] dark:border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#00236f] flex items-center justify-center text-white shadow-xs">
+          <div className="w-10 h-10 rounded-xl bg-[#00236f] dark:bg-blue-600 flex items-center justify-center text-white shadow-xs">
             <span className="material-symbols-outlined text-2xl">point_of_sale</span>
           </div>
           <div>
-            <h1 className="font-bold text-base text-[#0b1c30] leading-tight flex items-center gap-2">
+            <h1 className="font-bold text-base text-[#0b1c30] dark:text-slate-100 leading-tight flex items-center gap-2">
               <span>StationeryPOS</span>
-              <span className="text-[11px] font-normal px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">
+              <span className="text-[11px] font-normal px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                 Hub & Member
               </span>
             </h1>
-            <p className="text-xs text-[#5a6072]">
+            <p className="text-xs text-[#5a6072] dark:text-slate-400">
               Sistem Kasir Ritel & Portal Keanggotaan Member
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 text-xs text-[#5a6072]">
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-[#d8dce6] rounded-lg font-mono">
+        <div className="flex items-center gap-2.5 text-xs text-[#5a6072] dark:text-slate-400">
+          <ThemeToggle variant="compact" />
+
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-slate-900 border border-[#d8dce6] dark:border-slate-800 rounded-lg font-mono">
             <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
             Register: POS-01
           </span>
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-medium text-xs">
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-lg font-medium text-xs">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             Turso DB: Sinkron
           </span>
@@ -274,9 +277,9 @@ export const LoginView: React.FC<LoginViewProps> = ({
       {/* Main Container */}
       <main className="w-full max-w-5xl my-auto grid grid-cols-1 lg:grid-cols-12 gap-6 py-6 items-start">
         {/* Left Column: Form Tab (7 cols) */}
-        <section className="lg:col-span-7 bg-white rounded-2xl p-6 sm:p-8 border border-[#d8dce6] shadow-xs">
+        <section className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-[#d8dce6] dark:border-slate-800 shadow-xs transition-colors">
           {/* Main Mode Toggle: Staff vs Member */}
-          <div className="flex p-1 bg-[#f0f3fa] rounded-xl mb-6 border border-[#d8dce6]">
+          <div className="flex p-1 bg-[#f0f3fa] dark:bg-slate-800 rounded-xl mb-6 border border-[#d8dce6] dark:border-slate-700">
             <button
               type="button"
               onClick={() => {
@@ -286,8 +289,8 @@ export const LoginView: React.FC<LoginViewProps> = ({
               }}
               className={`flex-1 py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 authMode === 'staff'
-                  ? 'bg-white text-[#00236f] shadow-xs'
-                  : 'text-[#5a6072] hover:text-[#0b1c30]'
+                  ? 'bg-white dark:bg-slate-700 text-[#00236f] dark:text-blue-200 shadow-xs'
+                  : 'text-[#5a6072] dark:text-slate-400 hover:text-[#0b1c30] dark:hover:text-slate-200'
               }`}
             >
               <span className="material-symbols-outlined text-lg">admin_panel_settings</span>
@@ -303,8 +306,8 @@ export const LoginView: React.FC<LoginViewProps> = ({
               }}
               className={`flex-1 py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 authMode === 'member'
-                  ? 'bg-[#00236f] text-white shadow-xs'
-                  : 'text-[#5a6072] hover:text-[#0b1c30]'
+                  ? 'bg-[#00236f] dark:bg-blue-600 text-white shadow-xs'
+                  : 'text-[#5a6072] dark:text-slate-400 hover:text-[#0b1c30] dark:hover:text-slate-200'
               }`}
             >
               <span className="material-symbols-outlined text-lg">card_membership</span>
@@ -314,8 +317,8 @@ export const LoginView: React.FC<LoginViewProps> = ({
 
           {/* Feedback Alerts */}
           {errorMsg && (
-            <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-start gap-2.5 animate-in fade-in-50">
-              <span className="material-symbols-outlined text-base text-red-700 mt-0.5">error</span>
+            <div className="mb-5 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 text-xs flex items-start gap-2.5 animate-in fade-in-50">
+              <span className="material-symbols-outlined text-base text-red-700 dark:text-red-400 mt-0.5">error</span>
               <div>
                 <strong className="block font-semibold">Perhatian</strong>
                 <span>{errorMsg}</span>
@@ -324,8 +327,8 @@ export const LoginView: React.FC<LoginViewProps> = ({
           )}
 
           {successMsg && (
-            <div className="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-start gap-2.5 animate-in fade-in-50">
-              <span className="material-symbols-outlined text-base text-emerald-700 mt-0.5">check_circle</span>
+            <div className="mb-5 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-start gap-2.5 animate-in fade-in-50">
+              <span className="material-symbols-outlined text-base text-emerald-700 dark:text-emerald-400 mt-0.5">check_circle</span>
               <div>
                 <strong className="block font-semibold">Berhasil</strong>
                 <span>{successMsg}</span>
@@ -339,21 +342,21 @@ export const LoginView: React.FC<LoginViewProps> = ({
           {authMode === 'staff' && (
             <div>
               <div className="mb-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-[#0b1c30]">
+                <h2 className="text-xl sm:text-2xl font-bold text-[#0b1c30] dark:text-slate-100">
                   Masuk Kasir / Staff
                 </h2>
-                <p className="text-xs sm:text-sm text-[#5a6072] mt-1">
+                <p className="text-xs sm:text-sm text-[#5a6072] dark:text-slate-400 mt-1">
                   Gunakan username dan kata sandi staff untuk membuka register kasir POS & manajemen toko.
                 </p>
               </div>
 
               <form onSubmit={handleStaffSubmit} className="space-y-4">
                 <div>
-                  <label htmlFor="staff-username" className="block text-xs font-semibold text-[#0b1c30] mb-1.5">
+                  <label htmlFor="staff-username" className="block text-xs font-semibold text-[#0b1c30] dark:text-slate-200 mb-1.5">
                     Username Staff
                   </label>
                   <div className="relative">
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#757682] text-lg">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#757682] dark:text-slate-400 text-lg">
                       person
                     </span>
                     <input
@@ -363,17 +366,17 @@ export const LoginView: React.FC<LoginViewProps> = ({
                       value={staffUsername}
                       onChange={(e) => setStaffUsername(e.target.value)}
                       placeholder="Contoh: haura / sarah / manager"
-                      className="w-full h-11 pl-10 pr-3 bg-white border border-[#c5c5d3] rounded-xl text-sm text-[#0b1c30] font-medium focus:border-[#00236f] focus:ring-1 focus:ring-[#00236f] outline-none"
+                      className="w-full h-11 pl-10 pr-3 bg-white dark:bg-slate-800 border border-[#c5c5d3] dark:border-slate-700 rounded-xl text-sm text-[#0b1c30] dark:text-slate-100 font-medium focus:border-[#00236f] dark:focus:border-blue-400 outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="staff-password" className="block text-xs font-semibold text-[#0b1c30] mb-1.5">
+                  <label htmlFor="staff-password" className="block text-xs font-semibold text-[#0b1c30] dark:text-slate-200 mb-1.5">
                     Kata Sandi
                   </label>
                   <div className="relative">
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#757682] text-lg">
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#757682] dark:text-slate-400 text-lg">
                       lock
                     </span>
                     <input
@@ -383,12 +386,12 @@ export const LoginView: React.FC<LoginViewProps> = ({
                       value={staffPassword}
                       onChange={(e) => setStaffPassword(e.target.value)}
                       placeholder="Masukkan kata sandi staff"
-                      className="w-full h-11 pl-10 pr-11 bg-white border border-[#c5c5d3] rounded-xl text-sm text-[#0b1c30] font-medium focus:border-[#00236f] focus:ring-1 focus:ring-[#00236f] outline-none font-mono"
+                      className="w-full h-11 pl-10 pr-11 bg-white dark:bg-slate-800 border border-[#c5c5d3] dark:border-slate-700 rounded-xl text-sm text-[#0b1c30] dark:text-slate-100 font-medium focus:border-[#00236f] dark:focus:border-blue-400 outline-none font-mono"
                     />
                     <button
                       type="button"
                       onClick={() => setShowStaffPassword(!showStaffPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#757682] hover:text-[#00236f] p-1 rounded cursor-pointer"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#757682] dark:text-slate-400 hover:text-[#00236f] dark:hover:text-blue-300 p-1 rounded cursor-pointer"
                       title={showStaffPassword ? 'Sembunyikan' : 'Lihat'}
                     >
                       <span className="material-symbols-outlined text-lg">
@@ -399,17 +402,17 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 </div>
 
                 <div className="flex items-center justify-between pt-1">
-                  <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-[#444651]">
+                  <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-[#444651] dark:text-slate-300">
                     <input
                       type="checkbox"
                       checked={staffRememberMe}
                       onChange={(e) => setStaffRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded text-[#00236f] border-[#c5c5d3] focus:ring-[#00236f]"
+                      className="w-4 h-4 rounded text-[#00236f] dark:text-blue-500 border-[#c5c5d3] dark:border-slate-700 focus:ring-[#00236f]"
                     />
                     <span>Ingat sesi di perangkat ini</span>
                   </label>
 
-                  <span className="text-xs text-[#5a6072] flex items-center gap-1 font-mono">
+                  <span className="text-xs text-[#5a6072] dark:text-slate-400 flex items-center gap-1 font-mono">
                     POS-SF-01
                   </span>
                 </div>
@@ -417,7 +420,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-11 mt-2 bg-[#00236f] hover:bg-[#12398c] active:bg-[#001b57] text-white font-semibold text-sm rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-colors disabled:opacity-60 shadow-xs"
+                  className="w-full h-11 mt-2 bg-[#00236f] dark:bg-blue-600 hover:bg-[#12398c] dark:hover:bg-blue-700 active:bg-[#001b57] text-white font-semibold text-sm rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-colors disabled:opacity-60 shadow-xs"
                 >
                   {isLoading ? (
                     <span>Memverifikasi kredensial...</span>
@@ -438,19 +441,19 @@ export const LoginView: React.FC<LoginViewProps> = ({
           {authMode === 'member' && (
             <div>
               {/* Sub Navigation: Sign In vs Sign Up */}
-              <div className="flex items-center justify-between border-b border-[#d8dce6] pb-3 mb-6">
+              <div className="flex items-center justify-between border-b border-[#d8dce6] dark:border-slate-800 pb-3 mb-6">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-[#0b1c30]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#0b1c30] dark:text-slate-100">
                     {memberAction === 'signin' ? 'Masuk Akun Member' : 'Pendaftaran Member Baru'}
                   </h2>
-                  <p className="text-xs sm:text-sm text-[#5a6072] mt-0.5">
+                  <p className="text-xs sm:text-sm text-[#5a6072] dark:text-slate-400 mt-0.5">
                     {memberAction === 'signin'
                       ? 'Dapatkan diskon belanja loyalitas & tukar poin reward di kasir.'
                       : 'Daftar sekarang & dapatkan bonus 50 poin + diskon belanja 5% langsung!'}
                   </p>
                 </div>
 
-                <div className="flex bg-[#f0f3fa] p-1 rounded-xl shrink-0">
+                <div className="flex bg-[#f0f3fa] dark:bg-slate-800 p-1 rounded-xl shrink-0">
                   <button
                     type="button"
                     onClick={() => {
@@ -460,8 +463,8 @@ export const LoginView: React.FC<LoginViewProps> = ({
                     }}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                       memberAction === 'signin'
-                        ? 'bg-white text-[#00236f] shadow-xs'
-                        : 'text-[#5a6072] hover:text-[#0b1c30]'
+                        ? 'bg-white dark:bg-slate-700 text-[#00236f] dark:text-blue-200 shadow-xs'
+                        : 'text-[#5a6072] dark:text-slate-400 hover:text-[#0b1c30] dark:hover:text-slate-200'
                     }`}
                   >
                     Sign In
@@ -475,8 +478,8 @@ export const LoginView: React.FC<LoginViewProps> = ({
                     }}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                       memberAction === 'signup'
-                        ? 'bg-[#00236f] text-white shadow-xs'
-                        : 'text-[#5a6072] hover:text-[#0b1c30]'
+                        ? 'bg-[#00236f] dark:bg-blue-600 text-white shadow-xs'
+                        : 'text-[#5a6072] dark:text-slate-400 hover:text-[#0b1c30] dark:hover:text-slate-200'
                     }`}
                   >
                     Sign Up
@@ -488,11 +491,11 @@ export const LoginView: React.FC<LoginViewProps> = ({
               {memberAction === 'signin' && (
                 <form onSubmit={handleMemberLogin} className="space-y-4">
                   <div>
-                    <label htmlFor="member-ident" className="block text-xs font-semibold text-[#0b1c30] mb-1.5">
+                    <label htmlFor="member-ident" className="block text-xs font-semibold text-[#0b1c30] dark:text-slate-200 mb-1.5">
                       Username / Email / No. HP / Kode Member
                     </label>
                     <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#757682] text-lg">
+                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#757682] dark:text-slate-400 text-lg">
                         badge
                       </span>
                       <input
@@ -502,7 +505,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                         value={memberIdentifier}
                         onChange={(e) => setMemberIdentifier(e.target.value)}
                         placeholder="Contoh: anita / bambang / MBR-8801"
-                        className="w-full h-11 pl-10 pr-3 bg-white border border-[#c5c5d3] rounded-xl text-sm text-[#0b1c30] font-medium focus:border-[#00236f] focus:ring-1 focus:ring-[#00236f] outline-none"
+                        className="w-full h-11 pl-10 pr-3 bg-white dark:bg-slate-800 border border-[#c5c5d3] dark:border-slate-700 rounded-xl text-sm text-[#0b1c30] dark:text-slate-100 font-medium focus:border-[#00236f] dark:focus:border-blue-400 outline-none"
                       />
                     </div>
                   </div>

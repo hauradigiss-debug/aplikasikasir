@@ -1,5 +1,7 @@
 import React from 'react';
 import { NavigationTab, User } from '../types';
+import { ThemeToggle } from './ThemeToggle';
+import { PrinterStatusPill } from './PrinterStatusPill';
 
 interface NavigationProps {
   activeTab: NavigationTab;
@@ -49,61 +51,61 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
   return (
     <>
       {/* Desktop Navigation Drawer (Sidebar) */}
-      <aside className="hidden md:flex flex-col fixed left-0 top-0 h-full z-40 py-6 w-72 lg:w-80 rounded-r-xl border-r border-[#c5c5d3]/50 shadow-sm bg-white select-none">
+      <aside className="hidden md:flex flex-col fixed left-0 top-0 h-full z-40 py-6 w-72 lg:w-80 rounded-r-xl border-r border-[#c5c5d3]/50 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 select-none transition-colors duration-200">
         {/* Brand Header */}
-        <div className="px-6 lg:px-8 mb-6">
+        <div className="px-6 lg:px-8 mb-4">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-11 h-11 rounded-full overflow-hidden bg-[#d3e4fe] flex items-center justify-center text-[#00236f] shadow-sm">
+            <div className="w-11 h-11 rounded-full overflow-hidden bg-[#d3e4fe] dark:bg-slate-800 flex items-center justify-center text-[#00236f] dark:text-blue-400 shadow-sm">
               <span className="material-symbols-outlined text-2xl icon-fill">edit_note</span>
             </div>
             <div>
-              <h2 className="font-bold text-lg text-[#00236f] tracking-tight leading-tight">
+              <h2 className="font-bold text-lg text-[#00236f] dark:text-blue-300 tracking-tight leading-tight">
                 StationeryPOS
               </h2>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <p className="text-xs font-semibold text-[#00236f]">{roleLabel} Mode</p>
+                <p className="text-xs font-semibold text-[#00236f] dark:text-blue-200">{roleLabel} Mode</p>
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-between pt-2 border-t border-[#e5eeff]">
-            <p className="text-xs font-medium text-[#757682]">v1.0.4 • Ready</p>
-            <span className="text-[11px] font-semibold bg-[#eff4ff] text-[#00236f] px-2 py-0.5 rounded-full">
+          <div className="flex items-center justify-between pt-2 border-t border-[#e5eeff] dark:border-slate-800">
+            <p className="text-xs font-medium text-[#757682] dark:text-slate-400">v1.0.4 • Ready</p>
+            <span className="text-[11px] font-semibold bg-[#eff4ff] dark:bg-slate-800 text-[#00236f] dark:text-blue-300 px-2 py-0.5 rounded-full border border-blue-100 dark:border-slate-700">
               Terminal #01
             </span>
           </div>
         </div>
 
         {/* Navigation links */}
-        <nav className="flex-1 flex flex-col gap-1.5 px-3">
+        <nav className="flex-1 flex flex-col gap-1.5 px-3 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex items-center justify-between text-left w-full px-4 py-3 rounded-full transition-all duration-150 group cursor-pointer ${
+                className={`flex items-center justify-between text-left w-full px-4 py-2.5 rounded-xl transition-all duration-150 group cursor-pointer ${
                   isActive
-                    ? 'bg-[#1e3a8a] text-white shadow-sm font-semibold translate-x-1'
-                    : 'text-[#444651] hover:bg-[#eff4ff] hover:text-[#00236f]'
+                    ? 'bg-[#1e3a8a] dark:bg-blue-600 text-white shadow-sm font-semibold translate-x-1'
+                    : 'text-[#444651] dark:text-slate-300 hover:bg-[#eff4ff] dark:hover:bg-slate-800 hover:text-[#00236f] dark:hover:text-white'
                 }`}
               >
                 <div className="flex items-center gap-3.5">
                   <span
                     className={`material-symbols-outlined text-[22px] transition-transform group-hover:scale-105 ${
-                      isActive ? 'icon-fill text-[#90a8ff]' : 'text-[#757682]'
+                      isActive ? 'icon-fill text-[#90a8ff] dark:text-blue-200' : 'text-[#757682] dark:text-slate-400'
                     }`}
                   >
                     {item.icon}
                   </span>
-                  <span className="text-[15px] font-medium tracking-tight">{item.label}</span>
+                  <span className="text-[14px] font-medium tracking-tight">{item.label}</span>
                 </div>
                 {(item as any).special && (
                   <span
                     className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
                       isActive
                         ? 'bg-amber-300 text-amber-950 font-bold'
-                        : 'bg-blue-100 text-[#00236f] border border-blue-200'
+                        : 'bg-blue-100 dark:bg-blue-900/60 text-[#00236f] dark:text-blue-300 border border-blue-200 dark:border-blue-700'
                     }`}
                   >
                     Admin
@@ -114,7 +116,7 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
                     className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
                       isActive
                         ? 'bg-amber-400 text-amber-950'
-                        : 'bg-amber-100 text-amber-800'
+                        : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'
                     }`}
                   >
                     {item.badge}
@@ -125,25 +127,38 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
           })}
         </nav>
 
+        {/* Bluetooth Mini Printer Quick Status in Desktop Sidebar */}
+        <div className="px-4 mb-2">
+          <PrinterStatusPill variant="sidebar" />
+        </div>
+
+        {/* Theme Mode Switcher in Desktop Sidebar */}
+        <div className="px-4 mb-3 pt-1">
+          <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5 px-1">
+            <span>Tema Tampilan</span>
+          </div>
+          <ThemeToggle variant="segmented" />
+        </div>
+
         {/* Quick Shift / User summary with Logout */}
-        <div className="mx-4 mt-auto p-3.5 bg-[#f8f9ff] border border-[#d3e4fe]/80 rounded-xl">
+        <div className="mx-4 mt-auto p-3 bg-[#f8f9ff] dark:bg-slate-800/80 border border-[#d3e4fe]/80 dark:border-slate-700/80 rounded-xl">
           <div className="flex items-center justify-between mb-2">
             {currentUser?.role === 'super_admin' ? (
               <button
                 type="button"
                 onClick={() => setActiveTab('admin_security')}
-                className="text-[10px] font-bold text-[#00236f] hover:bg-[#d3e4fe] uppercase tracking-wider bg-white px-2 py-0.5 rounded border border-[#d3e4fe] flex items-center gap-1 cursor-pointer transition-colors"
+                className="text-[10px] font-bold text-[#00236f] dark:text-blue-300 hover:bg-[#d3e4fe] dark:hover:bg-slate-700 uppercase tracking-wider bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-[#d3e4fe] dark:border-slate-700 flex items-center gap-1 cursor-pointer transition-colors"
                 title="Buka Menu CRUD Password Super Admin"
               >
                 <span className="material-symbols-outlined text-[13px]">shield_lock</span>
                 <span>SUPER ADMIN</span>
               </button>
             ) : (
-              <span className="text-[10px] font-bold text-[#00236f] uppercase tracking-wider bg-white px-2 py-0.5 rounded border border-[#d3e4fe]">
+              <span className="text-[10px] font-bold text-[#00236f] dark:text-blue-300 uppercase tracking-wider bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-[#d3e4fe] dark:border-slate-700">
                 REGISTER POS
               </span>
             )}
-            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700">
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               Online
             </span>
@@ -151,14 +166,14 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-[#00236f] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+              <div className="w-9 h-9 rounded-full bg-[#00236f] dark:bg-blue-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
                 {currentUser?.fullName?.charAt(0) || 'H'}
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-[#0b1c30] truncate">
+                <p className="text-xs font-bold text-[#0b1c30] dark:text-slate-100 truncate">
                   {currentUser?.fullName || 'Haura'}
                 </p>
-                <p className="text-[11px] text-[#757682] truncate">@{currentUser?.username || 'haura'}</p>
+                <p className="text-[11px] text-[#757682] dark:text-slate-400 truncate">@{currentUser?.username || 'haura'}</p>
               </div>
             </div>
 
@@ -167,19 +182,19 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
                 type="button"
                 onClick={onLogout}
                 title="Keluar / Logout"
-                className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 hover:text-red-700 transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[20px]">logout</span>
               </button>
             )}
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-[#d3e4fe]/60 flex items-center justify-between text-[10px] text-[#5a6072]">
+          <div className="mt-2.5 pt-2 border-t border-[#d3e4fe]/60 dark:border-slate-700/60 flex items-center justify-between text-[10px] text-[#5a6072] dark:text-slate-400">
             <span className="flex items-center gap-1 font-mono">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
               Turso DB
             </span>
-            <span className="text-[#00236f] font-semibold truncate max-w-[130px]">mykasirdb (Tokyo)</span>
+            <span className="text-[#00236f] dark:text-blue-300 font-semibold truncate max-w-[130px]">mykasirdb (Tokyo)</span>
           </div>
         </div>
       </aside>
@@ -188,27 +203,38 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
       {mobileDrawerOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileDrawerOpen(false)}
           />
-          <div className="fixed top-0 bottom-0 left-0 w-4/5 max-w-xs bg-white shadow-2xl p-6 flex flex-col justify-between z-10 animate-in slide-in-from-left duration-200">
+          <div className="fixed top-0 bottom-0 left-0 w-4/5 max-w-xs bg-white dark:bg-slate-900 shadow-2xl p-6 flex flex-col justify-between z-10 animate-in slide-in-from-left duration-200">
             <div>
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#e5eeff]">
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#e5eeff] dark:border-slate-800">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-full bg-[#d3e4fe] flex items-center justify-center text-[#00236f]">
+                  <div className="w-10 h-10 rounded-full bg-[#d3e4fe] dark:bg-slate-800 flex items-center justify-center text-[#00236f] dark:text-blue-300">
                     <span className="material-symbols-outlined text-2xl icon-fill">edit_note</span>
                   </div>
                   <div>
-                    <h2 className="font-bold text-lg text-[#00236f]">StationeryPOS</h2>
-                    <p className="text-xs text-[#757682]">Terminal #01</p>
+                    <h2 className="font-bold text-lg text-[#00236f] dark:text-blue-300">StationeryPOS</h2>
+                    <p className="text-xs text-[#757682] dark:text-slate-400">Terminal #01</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setMobileDrawerOpen(false)}
-                  className="p-1 rounded-full text-[#757682] hover:bg-gray-100"
+                  className="p-1 rounded-full text-[#757682] dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800"
                 >
                   <span className="material-symbols-outlined">close</span>
                 </button>
+              </div>
+
+              {/* Printer Status in Mobile Drawer */}
+              <div className="mb-3">
+                <PrinterStatusPill variant="sidebar" />
+              </div>
+
+              {/* Theme Toggle in Mobile Drawer */}
+              <div className="mb-4">
+                <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Tema Tampilan</p>
+                <ThemeToggle variant="segmented" />
               </div>
 
               <div className="space-y-1">
@@ -221,10 +247,10 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
                         setActiveTab(item.id);
                         setMobileDrawerOpen(false);
                       }}
-                      className={`flex items-center justify-between text-left w-full px-4 py-3 rounded-full transition-all ${
+                      className={`flex items-center justify-between text-left w-full px-4 py-2.5 rounded-xl transition-all ${
                         isActive
-                          ? 'bg-[#1e3a8a] text-white font-semibold'
-                          : 'text-[#444651] hover:bg-[#eff4ff]'
+                          ? 'bg-[#1e3a8a] dark:bg-blue-600 text-white font-semibold'
+                          : 'text-[#444651] dark:text-slate-300 hover:bg-[#eff4ff] dark:hover:bg-slate-800'
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -236,7 +262,7 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
                           className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
                             isActive
                               ? 'bg-amber-300 text-amber-950 font-bold'
-                              : 'bg-blue-100 text-[#00236f] border border-blue-200'
+                              : 'bg-blue-100 dark:bg-blue-900/60 text-[#00236f] dark:text-blue-300 border border-blue-200 dark:border-blue-700'
                           }`}
                         >
                           Admin
@@ -245,7 +271,7 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
                       {item.badge > 0 && (
                         <span
                           className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                            isActive ? 'bg-amber-400 text-amber-950' : 'bg-amber-100 text-amber-800'
+                            isActive ? 'bg-amber-400 text-amber-950' : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'
                           }`}
                         >
                           {item.badge}
@@ -257,17 +283,17 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
               </div>
             </div>
 
-            <div className="p-3.5 bg-[#f8f9ff] border border-[#d3e4fe] rounded-xl text-xs text-[#444651] space-y-2">
+            <div className="p-3.5 bg-[#f8f9ff] dark:bg-slate-800/80 border border-[#d3e4fe] dark:border-slate-700 rounded-xl text-xs text-[#444651] dark:text-slate-300 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-[#00236f]">
+                <span className="font-bold text-[#00236f] dark:text-blue-300">
                   {currentUser?.role === 'super_admin' ? 'SUPER ADMIN' : 'STAF KASIR'}
                 </span>
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-bold text-sm text-[#0b1c30]">{currentUser?.fullName || 'Haura'}</p>
-                  <p className="text-[11px] text-[#757682]">@{currentUser?.username || 'haura'}</p>
+                  <p className="font-bold text-sm text-[#0b1c30] dark:text-slate-100">{currentUser?.fullName || 'Haura'}</p>
+                  <p className="text-[11px] text-[#757682] dark:text-slate-400">@{currentUser?.username || 'haura'}</p>
                 </div>
                 {onLogout && (
                   <button
@@ -275,19 +301,12 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
                       setMobileDrawerOpen(false);
                       onLogout();
                     }}
-                    className="px-3 py-1 bg-red-50 text-red-700 font-semibold rounded-lg flex items-center gap-1"
+                    className="px-3 py-1 bg-red-50 dark:bg-red-950/50 text-red-700 dark:text-red-300 font-semibold rounded-lg flex items-center gap-1"
                   >
                     <span className="material-symbols-outlined text-sm">logout</span>
                     Keluar
                   </button>
                 )}
-              </div>
-              <div className="pt-2 border-t border-[#d3e4fe]/60 flex items-center justify-between text-[11px] text-[#5a6072]">
-                <span className="flex items-center gap-1 font-mono">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  Turso Cloud
-                </span>
-                <span className="text-[#00236f] font-semibold">mykasirdb-hauradigiss</span>
               </div>
             </div>
           </div>
@@ -295,34 +314,40 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
       )}
 
       {/* Mobile Top AppBar */}
-      <header className="md:hidden flex justify-between items-center w-full px-4 h-16 bg-white border-b border-[#c5c5d3]/50 fixed top-0 left-0 z-40 shadow-xs">
+      <header className="md:hidden flex justify-between items-center w-full px-4 h-16 bg-white dark:bg-slate-900 border-b border-[#c5c5d3]/50 dark:border-slate-800 fixed top-0 left-0 z-40 shadow-xs transition-colors">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setMobileDrawerOpen(true)}
-            className="p-1.5 rounded-lg text-[#00236f] hover:bg-[#eff4ff] transition-colors"
+            className="p-1.5 rounded-lg text-[#00236f] dark:text-blue-300 hover:bg-[#eff4ff] dark:hover:bg-slate-800 transition-colors"
             aria-label="Open Navigation Menu"
           >
             <span className="material-symbols-outlined text-[26px]">menu</span>
           </button>
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#00236f] icon-fill text-2xl">edit_note</span>
-            <h1 className="text-xl font-bold text-[#00236f] tracking-tight">StationeryPOS</h1>
+            <span className="material-symbols-outlined text-[#00236f] dark:text-blue-400 icon-fill text-2xl">edit_note</span>
+            <h1 className="text-xl font-bold text-[#00236f] dark:text-blue-300 tracking-tight">StationeryPOS</h1>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Quick Printer Status for Mobile Header */}
+          <PrinterStatusPill variant="compact" />
+
+          {/* Quick Theme Toggle for Mobile Header */}
+          <ThemeToggle variant="compact" />
+
           {onLogout && (
             <button
               onClick={onLogout}
-              className="px-2.5 py-1 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-full flex items-center gap-1"
+              className="px-2.5 py-1 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900 rounded-full flex items-center gap-1"
               title="Keluar"
             >
               <span className="material-symbols-outlined text-[16px]">logout</span>
-              Keluar
+              <span className="hidden xs:inline">Keluar</span>
             </button>
           )}
           <button
             onClick={() => setActiveTab('settings')}
-            className="w-9 h-9 rounded-full overflow-hidden bg-[#d3e4fe] flex items-center justify-center text-[#00236f] hover:opacity-90 transition-opacity font-bold text-xs"
+            className="w-9 h-9 rounded-full overflow-hidden bg-[#d3e4fe] dark:bg-slate-800 flex items-center justify-center text-[#00236f] dark:text-blue-300 hover:opacity-90 transition-opacity font-bold text-xs"
             title="Profile & Settings"
           >
             {currentUser?.fullName?.charAt(0) || <span className="material-symbols-outlined text-lg">person</span>}
@@ -331,11 +356,11 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
       </header>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full z-40 flex justify-around items-center h-20 px-2 pb-2 bg-white border-t border-[#c5c5d3]/50 shadow-lg">
+      <nav className="md:hidden fixed bottom-0 left-0 w-full z-40 flex justify-around items-center h-20 px-2 pb-2 bg-white dark:bg-slate-900 border-t border-[#c5c5d3]/50 dark:border-slate-800 shadow-lg transition-colors">
         <button
           onClick={() => setActiveTab('dashboard')}
           className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
-            activeTab === 'dashboard' ? 'text-[#00236f] font-bold' : 'text-[#444651] hover:text-[#00236f]'
+            activeTab === 'dashboard' ? 'text-[#00236f] dark:text-blue-400 font-bold' : 'text-[#444651] dark:text-slate-400 hover:text-[#00236f]'
           }`}
         >
           <span className={`material-symbols-outlined mb-0.5 text-2xl ${activeTab === 'dashboard' ? 'icon-fill' : ''}`}>
@@ -347,7 +372,7 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
         <button
           onClick={() => setActiveTab('cashier')}
           className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
-            activeTab === 'cashier' ? 'text-[#00236f] font-bold' : 'text-[#444651] hover:text-[#00236f]'
+            activeTab === 'cashier' ? 'text-[#00236f] dark:text-blue-400 font-bold' : 'text-[#444651] dark:text-slate-400 hover:text-[#00236f]'
           }`}
         >
           <span className={`material-symbols-outlined mb-0.5 text-2xl ${activeTab === 'cashier' ? 'icon-fill' : ''}`}>
@@ -360,8 +385,8 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
           onClick={() => setActiveTab('products')}
           className={`flex flex-col items-center justify-center flex-1 py-1 rounded-full ${
             activeTab === 'products'
-              ? 'bg-[#1e3a8a] text-white px-3 py-1.5 shadow-sm scale-95'
-              : 'text-[#444651] hover:text-[#00236f]'
+              ? 'bg-[#1e3a8a] dark:bg-blue-600 text-white px-3 py-1.5 shadow-sm scale-95'
+              : 'text-[#444651] dark:text-slate-400 hover:text-[#00236f]'
           }`}
         >
           <span className={`material-symbols-outlined mb-0.5 text-2xl ${activeTab === 'products' ? 'icon-fill text-[#90a8ff]' : ''}`}>
@@ -373,7 +398,7 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
         <button
           onClick={() => setActiveTab('history')}
           className={`flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
-            activeTab === 'history' ? 'text-[#00236f] font-bold' : 'text-[#444651] hover:text-[#00236f]'
+            activeTab === 'history' ? 'text-[#00236f] dark:text-blue-400 font-bold' : 'text-[#444651] dark:text-slate-400 hover:text-[#00236f]'
           }`}
         >
           <span className={`material-symbols-outlined mb-0.5 text-2xl ${activeTab === 'history' ? 'icon-fill' : ''}`}>
@@ -385,3 +410,4 @@ export const NavigationDrawer: React.FC<NavigationProps> = ({
     </>
   );
 };
+

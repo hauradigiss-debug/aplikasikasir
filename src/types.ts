@@ -71,6 +71,23 @@ export interface Order {
   status: 'completed' | 'refunded' | 'voided';
 }
 
+export type ThemeMode = 'light' | 'dark' | 'system';
+
+export type PrinterConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'error';
+export type PrinterPaperWidth = '58mm' | '80mm';
+
+export interface BluetoothPrinterConfig {
+  deviceName?: string;
+  deviceId?: string;
+  paperWidth: PrinterPaperWidth;
+  autoPrintOnCheckout: boolean;
+  autoReconnect: boolean;
+  feedLines: number;
+  openCashDrawerOnPrint: boolean;
+  virtualSimulationMode: boolean;
+  lastConnected?: string;
+}
+
 export interface StoreSettings {
   storeName: string;
   tagline: string;
@@ -81,6 +98,8 @@ export interface StoreSettings {
   lowStockThreshold: number;
   receiptFooter: string;
   enableSound: boolean;
+  themeMode?: ThemeMode;
+  printerConfig?: BluetoothPrinterConfig;
 }
 
 export type NavigationTab = 'dashboard' | 'products' | 'cashier' | 'history' | 'categories' | 'members' | 'settings' | 'admin_security';

@@ -37,19 +37,19 @@ export const BarcodeSheetModal: React.FC<BarcodeSheetModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/70 backdrop-blur-xs">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-xs">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden transition-colors">
         {/* Header */}
-        <div className="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
+        <div className="px-5 py-4 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#00236f] text-white flex items-center justify-center shadow-xs">
+            <div className="w-8 h-8 rounded-lg bg-[#00236f] dark:bg-blue-600 text-white flex items-center justify-center shadow-xs">
               <span className="material-symbols-outlined text-lg">print</span>
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold text-[#0b1c30]">
+              <h2 className="text-sm sm:text-base font-bold text-[#0b1c30] dark:text-slate-100">
                 Lembar Cetak Barcode & Label Produk
               </h2>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 Cetak label barcode untuk ditempel pada produk fisik atau scan langsung dari layar.
               </p>
             </div>
@@ -59,7 +59,7 @@ export const BarcodeSheetModal: React.FC<BarcodeSheetModalProps> = ({
             <button
               type="button"
               onClick={handlePrint}
-              className="px-3.5 h-8 bg-[#00236f] hover:bg-[#1a388b] text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="px-3.5 h-8 bg-[#00236f] dark:bg-blue-600 hover:bg-[#1a388b] dark:hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <span className="material-symbols-outlined text-base">print</span>
               <span>Cetak Barcode</span>
@@ -67,7 +67,7 @@ export const BarcodeSheetModal: React.FC<BarcodeSheetModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-200 transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-xl">close</span>
             </button>
@@ -75,14 +75,14 @@ export const BarcodeSheetModal: React.FC<BarcodeSheetModalProps> = ({
         </div>
 
         {/* Filter Toolbar */}
-        <div className="p-3 bg-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 shrink-0">
+        <div className="p-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 shrink-0 transition-colors">
           <div className="flex items-center gap-2 flex-1 min-w-[200px]">
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Cari nama atau SKU..."
-              className="w-full max-w-xs h-8 pl-3 pr-2 text-xs bg-slate-50 border border-slate-300 rounded-lg outline-none focus:border-[#00236f]"
+              className="w-full max-w-xs h-8 pl-3 pr-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg outline-none focus:border-[#00236f] dark:focus:border-blue-500"
             />
           </div>
 
@@ -92,8 +92,8 @@ export const BarcodeSheetModal: React.FC<BarcodeSheetModalProps> = ({
               onClick={() => setSelectedCat('All')}
               className={`px-2.5 py-1 rounded-full font-medium transition-colors cursor-pointer ${
                 selectedCat === 'All'
-                  ? 'bg-[#00236f] text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-[#00236f] dark:bg-blue-600 text-white'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
               Semua ({products.length})
@@ -105,8 +105,8 @@ export const BarcodeSheetModal: React.FC<BarcodeSheetModalProps> = ({
                 onClick={() => setSelectedCat(cat)}
                 className={`px-2.5 py-1 rounded-full font-medium transition-colors cursor-pointer ${
                   selectedCat === cat
-                    ? 'bg-[#00236f] text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    ? 'bg-[#00236f] dark:bg-blue-600 text-white'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
               >
                 {cat}
@@ -116,7 +116,7 @@ export const BarcodeSheetModal: React.FC<BarcodeSheetModalProps> = ({
         </div>
 
         {/* Barcode Grid Printable Content */}
-        <div id="printable-barcode-sheet" className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100">
+        <div id="printable-barcode-sheet" className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100 dark:bg-slate-950 transition-colors">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {filtered.map((prod) => (
               <div
@@ -153,7 +153,7 @@ export const BarcodeSheetModal: React.FC<BarcodeSheetModalProps> = ({
           </div>
 
           {filtered.length === 0 && (
-            <div className="py-12 text-center text-slate-400">
+            <div className="py-12 text-center text-slate-400 dark:text-slate-500">
               <span className="material-symbols-outlined text-4xl mb-1">barcode_scanner</span>
               <p className="text-xs">Tidak ada produk yang sesuai dengan filter.</p>
             </div>

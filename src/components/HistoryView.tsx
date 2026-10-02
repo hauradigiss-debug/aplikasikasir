@@ -75,15 +75,15 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight">Sales Report</h1>
-          <p className="text-sm text-[#444651] mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#0b1c30] dark:text-slate-100 tracking-tight">Sales Report</h1>
+          <p className="text-sm text-[#444651] dark:text-slate-400 mt-1">
             Complete transaction ledger, audit receipts, and cashier settlements
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handleExportCSV}
-            className="px-4 h-11 bg-white hover:bg-[#eff4ff] border border-[#c5c5d3] text-[#00236f] font-semibold text-xs rounded-full shadow-xs flex items-center gap-1.5 transition-colors"
+            className="px-4 h-11 bg-white dark:bg-slate-900 hover:bg-[#eff4ff] dark:hover:bg-slate-800 border border-[#c5c5d3] dark:border-slate-700 text-[#00236f] dark:text-blue-300 font-semibold text-xs rounded-full shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">download</span>
             Export CSV
@@ -93,19 +93,19 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
 
       {/* Sales Summary Banner */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-[#c5c5d3]/60 shadow-xs">
-          <span className="text-xs font-bold text-[#757682] uppercase">Period Net Revenue</span>
-          <h3 className="text-2xl font-bold text-[#00236f] mt-1">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-[#c5c5d3]/60 dark:border-slate-800 shadow-xs transition-colors">
+          <span className="text-xs font-bold text-[#757682] dark:text-slate-400 uppercase">Period Net Revenue</span>
+          <h3 className="text-2xl font-bold text-[#00236f] dark:text-blue-300 mt-1">
             {formatCurrency(totalFilteredSales, settings.currencySymbol)}
           </h3>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-[#c5c5d3]/60 shadow-xs">
-          <span className="text-xs font-bold text-[#757682] uppercase">Transactions Recorded</span>
-          <h3 className="text-2xl font-bold text-[#0b1c30] mt-1">{filteredOrders.length}</h3>
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-[#c5c5d3]/60 dark:border-slate-800 shadow-xs transition-colors">
+          <span className="text-xs font-bold text-[#757682] dark:text-slate-400 uppercase">Transactions Recorded</span>
+          <h3 className="text-2xl font-bold text-[#0b1c30] dark:text-slate-100 mt-1">{filteredOrders.length}</h3>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-[#c5c5d3]/60 shadow-xs">
-          <span className="text-xs font-bold text-[#757682] uppercase">Refunded Transactions</span>
-          <h3 className="text-2xl font-bold text-amber-700 mt-1">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-[#c5c5d3]/60 dark:border-slate-800 shadow-xs transition-colors">
+          <span className="text-xs font-bold text-[#757682] dark:text-slate-400 uppercase">Refunded Transactions</span>
+          <h3 className="text-2xl font-bold text-amber-700 dark:text-amber-400 mt-1">
             {filteredOrders.filter((o) => o.status === 'refunded').length}
           </h3>
         </div>
@@ -114,7 +114,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
       {/* Filter bar */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#757682]">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#757682] dark:text-slate-400">
             search
           </span>
           <input
@@ -122,7 +122,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by receipt #, customer name, or item..."
-            className="w-full h-11 pl-10 pr-4 bg-white border border-[#c5c5d3] rounded-lg text-sm text-[#0b1c30] focus:border-[#00236f] outline-none placeholder:text-[#757682]"
+            className="w-full h-11 pl-10 pr-4 bg-white dark:bg-slate-900 border border-[#c5c5d3] dark:border-slate-700 rounded-lg text-sm text-[#0b1c30] dark:text-slate-100 focus:border-[#00236f] dark:focus:border-blue-400 outline-none placeholder:text-[#757682] dark:placeholder:text-slate-500"
           />
         </div>
 
@@ -130,7 +130,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
           <select
             value={paymentFilter}
             onChange={(e) => setPaymentFilter(e.target.value)}
-            className="h-11 px-3 bg-white border border-[#c5c5d3] rounded-lg text-xs font-medium text-[#0b1c30] focus:border-[#00236f] outline-none"
+            className="h-11 px-3 bg-white dark:bg-slate-900 border border-[#c5c5d3] dark:border-slate-700 rounded-lg text-xs font-medium text-[#0b1c30] dark:text-slate-200 focus:border-[#00236f] dark:focus:border-blue-400 outline-none"
           >
             <option value="all">All Payment Types</option>
             <option value="cash">Cash</option>
@@ -141,7 +141,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-11 px-3 bg-white border border-[#c5c5d3] rounded-lg text-xs font-medium text-[#0b1c30] focus:border-[#00236f] outline-none"
+            className="h-11 px-3 bg-white dark:bg-slate-900 border border-[#c5c5d3] dark:border-slate-700 rounded-lg text-xs font-medium text-[#0b1c30] dark:text-slate-200 focus:border-[#00236f] dark:focus:border-blue-400 outline-none"
           >
             <option value="all">All Statuses</option>
             <option value="completed">Completed</option>
@@ -151,11 +151,11 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white rounded-2xl border border-[#c5c5d3]/60 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-[#c5c5d3]/60 dark:border-slate-800 shadow-xs overflow-hidden transition-colors">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[#f8f9ff] border-b border-[#e5eeff] text-[11px] font-bold text-[#757682] uppercase tracking-wider">
+              <tr className="bg-[#f8f9ff] dark:bg-slate-800 border-b border-[#e5eeff] dark:border-slate-700 text-[11px] font-bold text-[#757682] dark:text-slate-400 uppercase tracking-wider">
                 <th className="py-3.5 px-4">Receipt #</th>
                 <th className="py-3.5 px-4">Date & Time</th>
                 <th className="py-3.5 px-4">Customer</th>
@@ -166,44 +166,44 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                 <th className="py-3.5 px-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#f1f3f4] text-xs">
+            <tbody className="divide-y divide-[#f1f3f4] dark:divide-slate-800 text-xs">
               {filteredOrders.map((ord) => (
-                <tr key={ord.id} className="hover:bg-[#f8f9ff] transition-colors">
-                  <td className="py-3 px-4 font-mono font-bold text-[#00236f]">
+                <tr key={ord.id} className="hover:bg-[#f8f9ff] dark:hover:bg-slate-800/60 transition-colors">
+                  <td className="py-3 px-4 font-mono font-bold text-[#00236f] dark:text-blue-300">
                     {ord.receiptNumber}
                   </td>
-                  <td className="py-3 px-4 text-[#444651]">
+                  <td className="py-3 px-4 text-[#444651] dark:text-slate-300">
                     {new Date(ord.timestamp).toLocaleDateString([], {
                       month: 'short',
                       day: 'numeric',
                     })}{' '}
-                    <span className="text-[11px] text-[#757682]">
+                    <span className="text-[11px] text-[#757682] dark:text-slate-400">
                       {new Date(ord.timestamp).toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}
                     </span>
                   </td>
-                  <td className="py-3 px-4 font-medium text-[#0b1c30]">
+                  <td className="py-3 px-4 font-medium text-[#0b1c30] dark:text-slate-200">
                     {ord.customerName || 'Walk-in'}
                   </td>
-                  <td className="py-3 px-4 text-[#444651]">
+                  <td className="py-3 px-4 text-[#444651] dark:text-slate-300">
                     {ord.items.reduce((s, i) => s + i.quantity, 0)} units
                   </td>
                   <td className="py-3 px-4">
-                    <span className="uppercase text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 text-[#444651]">
+                    <span className="uppercase text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-800 text-[#444651] dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                       {ord.paymentMethod}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-right font-bold text-[#00236f]">
+                  <td className="py-3 px-4 text-right font-bold text-[#00236f] dark:text-blue-300">
                     {formatCurrency(ord.total, settings.currencySymbol)}
                   </td>
                   <td className="py-3 px-4 text-center">
                     <span
                       className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
                         ord.status === 'completed'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-red-100 text-red-800'
+                          ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
+                          : 'bg-red-100 dark:bg-rose-950 text-red-800 dark:text-rose-300 border border-red-300 dark:border-rose-800'
                       }`}
                     >
                       {ord.status}
@@ -213,7 +213,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                     <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => onOpenReceipt(ord)}
-                        className="p-1.5 rounded-lg text-[#00236f] hover:bg-[#eff4ff]"
+                        className="p-1.5 rounded-lg text-[#00236f] dark:text-blue-300 hover:bg-[#eff4ff] dark:hover:bg-slate-800 cursor-pointer"
                         title="View / Print Receipt"
                       >
                         <span className="material-symbols-outlined text-[18px]">receipt</span>
@@ -225,7 +225,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                               onRefundOrder(ord.id);
                             }
                           }}
-                          className="p-1.5 rounded-lg text-[#757682] hover:text-[#ba1a1a] hover:bg-red-50"
+                          className="p-1.5 rounded-lg text-[#757682] dark:text-slate-400 hover:text-[#ba1a1a] dark:hover:text-rose-400 hover:bg-red-50 dark:hover:bg-rose-950/50 cursor-pointer"
                           title="Refund"
                         >
                           <span className="material-symbols-outlined text-[18px]">undo</span>
@@ -237,7 +237,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
               ))}
               {filteredOrders.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-[#757682]">
+                  <td colSpan={8} className="py-12 text-center text-[#757682] dark:text-slate-400">
                     No transactions match your search filter.
                   </td>
                 </tr>
