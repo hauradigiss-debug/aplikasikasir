@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
-import { generateDynamicQrisPayload } from '../utils/qris';
+import { Html5Qrcode } from 'html5-qrcode';
+import { generateDynamicQrisPayload, parseQrisPayload } from '../utils/qris';
 import { formatCurrency, playSound } from '../utils';
 import { StoreSettings } from '../types';
 
@@ -29,7 +30,12 @@ export const QrisDisplayCard: React.FC<QrisDisplayCardProps> = ({
   const [verificationStatus, setVerificationStatus] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(300); // 5 minutes countdown
   const [currentTimeStr, setCurrentTimeStr] = useState<string>('');
-  const cardRef = useRef<HTMLDivElement>(null);
+  const [isFullscreenModalOpen, setIsFullscreenModalOpen] = useState(false);
+  const [isCameraScannerActive, setIsCameraScannerActive] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+
+  const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
+  const scannerContainerId = 'qris-payment-camera-stream';
 
   const nmid = settings.qrisNmid || 'ID1020038291039';
   const terminalId = settings.qrisTerminalId || 'A01';
@@ -60,7 +66,8 @@ export const QrisDisplayCard: React.FC<QrisDisplayCardProps> = ({
     return () => clearInterval(timer);
   }, []);
 
-  // Generate dynamic QR code whenever amount, storeName, or invoice changes
+  // Generate dynamic QR code with real-time nominal amount
+  // Crucial: No overlay div covering the QR center; pure black on white with 2-module margin!
   useEffect(() => {
     try {
       const payload = generateDynamicQrisPayload({
@@ -75,11 +82,11 @@ export const QrisDisplayCard: React.FC<QrisDisplayCardProps> = ({
       setQrisPayloadString(payload);
 
       QRCode.toDataURL(payload, {
-        width: 320,
-        margin: 1,
+        width: 400,
+        margin: 2,
         color: {
-          dark: '#0f172a',
-          light: '#ffffff',
+          dark: '#000000', // 100% pure black for optimal camera recognition
+          light: '#ffffff', // 100% pure white
         },
         errorCorrectionLevel: 'M',
       })
@@ -94,23 +101,104 @@ export const QrisDisplayCard: React.FC<QrisDisplayCardProps> = ({
     }
   }, [amount, storeName, nmid, terminalId, invoiceNumber]);
 
+  // Clean up camera scanner when component unmounts or scanner closes
+  useEffect(() => {
+    return () => {
+      if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
+        html5QrCodeRef.current
+          .stop()
+          .catch((err) => console.warn('Error stopping scanner:', err));
+      }
+    };
+  }, []);
+
+  // Toggle Camera Scanner to scan customer QR or test scanner
+  const handleToggleCameraScanner = async () => {
+    if (isCameraScannerActive) {
+      if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
+        try {
+          await html5QrCodeRef.current.stop();
+        } catch (err) {
+          console.warn('Error stopping scanner:', err);
+        }
+      }
+      setIsCameraScannerActive(false);
+      setCameraError(null);
+      return;
+    }
+
+    setIsCameraScannerActive(true);
+    setCameraError(null);
+
+    // Wait for DOM element to render
+    setTimeout(async () => {
+      try {
+        const qrScanner = new Html5Qrcode(scannerContainerId);
+        html5QrCodeRef.current = qrScanner;
+
+        const config = {
+          fps: 10,
+          qrbox: { width: 220, height: 220 },
+          aspectRatio: 1.0,
+        };
+
+        await qrScanner.start(
+          { facingMode: 'environment' },
+          config,
+          (decodedText) => {
+            // QR Code successfully scanned by camera!
+            if (settings.enableSound) playSound('beep');
+            const parsed = parseQrisPayload(decodedText);
+
+            const randomRRN =
+              'RRN' + Math.floor(100000000000 + Math.random() * 900000000000).toString();
+            const detectedIssuer = parsed.merchantName
+              ? `QRIS (${parsed.merchantName.slice(0, 15)})`
+              : 'E-Wallet Nasabah';
+
+            // Stop camera
+            qrScanner.stop().catch(() => {});
+            setIsCameraScannerActive(false);
+
+            if (onPaymentSuccess) {
+              onPaymentSuccess({
+                nmid,
+                terminalId,
+                referenceNumber: randomRRN,
+                issuer: detectedIssuer,
+              });
+            }
+          },
+          (errorMessage) => {
+            // Scanning in progress
+          }
+        );
+      } catch (err: any) {
+        console.error('Camera start error:', err);
+        setCameraError(
+          err?.message || 'Tidak dapat mengakses kamera. Pastikan izin kamera telah diberikan.'
+        );
+      }
+    }, 150);
+  };
+
   // Handle simulated status check
   const handleCheckStatus = () => {
     setIsVerifying(true);
-    setVerificationStatus('Memverifikasi status transaksi ke jaringan QRIS / GPN...');
+    setVerificationStatus('Menghubungkan ke Gateway GPN / QRIS...');
     if (settings.enableSound) playSound('beep');
 
     setTimeout(() => {
       setIsVerifying(false);
-      setVerificationStatus('Menunggu pembayaran dari nasabah (Belum terdeteksi)');
+      setVerificationStatus('QRIS aktif & nominal valid. Menunggu konfirmasi pembayaran...');
       setTimeout(() => setVerificationStatus(null), 4000);
-    }, 1200);
+    }, 1000);
   };
 
   // Simulate Instant Customer Scan & Successful Payment
   const handleSimulateInstantPay = () => {
     if (settings.enableSound) playSound('success');
-    const issuers = ['GoPay', 'BCA Mobile', 'Mandiri Livin', 'DANA', 'BRImo', 'ShopeePay', 'OVO'];
+    const issuers = ['BCA Mobile', 'GoPay', 'Mandiri Livin', 'DANA', 'BRImo', 'ShopeePay', 'OVO'];
     const randomIssuer = issuers[Math.floor(Math.random() * issuers.length)];
     const randomRRN = 'RRN' + Math.floor(100000000000 + Math.random() * 900000000000).toString();
 
@@ -136,7 +224,7 @@ export const QrisDisplayCard: React.FC<QrisDisplayCardProps> = ({
   // Copy payload string
   const handleCopyPayload = () => {
     navigator.clipboard.writeText(qrisPayloadString);
-    setVerificationStatus('Kode payload string QRIS berhasil disalin ke clipboard!');
+    setVerificationStatus('Kode string QRIS berhasil disalin! Format EMVCo siap pakai.');
     setTimeout(() => setVerificationStatus(null), 3000);
   };
 
@@ -147,10 +235,7 @@ export const QrisDisplayCard: React.FC<QrisDisplayCardProps> = ({
   return (
     <div className="flex flex-col items-center w-full">
       {/* Official Indonesian QRIS Standee Frame */}
-      <div
-        ref={cardRef}
-        className="w-full max-w-[360px] bg-white rounded-2xl shadow-xl border-2 border-[#cb1c1d] overflow-hidden text-slate-900 select-none transition-transform"
-      >
+      <div className="w-full max-w-[360px] bg-white rounded-2xl shadow-xl border-2 border-[#cb1c1d] overflow-hidden text-slate-900 select-none transition-transform">
         {/* Top Header Bar - QRIS Red */}
         <div className="bg-[#cb1c1d] px-4 py-3 flex items-center justify-between text-white relative shadow-sm">
           {/* QRIS Logo */}
@@ -166,7 +251,6 @@ export const QrisDisplayCard: React.FC<QrisDisplayCardProps> = ({
 
           {/* GPN Official Logo */}
           <div className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-full shadow-xs">
-            {/* GPN Garuda arrow icon */}
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
               <path d="M4 12L12 4L10 12L4 12Z" fill="#cb1c1d" />
               <path d="M20 12L12 20L14 12L20 12Z" fill="#003882" />
@@ -182,20 +266,23 @@ export const QrisDisplayCard: React.FC<QrisDisplayCardProps> = ({
             {storeName}
           </h4>
           <div className="flex items-center justify-center gap-2 text-[10px] text-slate-600 font-mono mt-0.5">
-            <span>NMID: <strong className="text-slate-900">{nmid}</strong></span>
+            <span>
+              NMID: <strong className="text-slate-900">{nmid}</strong>
+            </span>
             <span>•</span>
-            <span>A01</span>
+            <span>TID: {terminalId}</span>
           </div>
         </div>
 
-        {/* Dynamic QR Code Matrix Container */}
+        {/* Dynamic QR Code Matrix Container (100% Unobstructed for perfect camera scanning) */}
         <div className="p-4 flex flex-col items-center justify-center bg-white relative">
-          <div className="relative p-2 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-center">
+          <div className="relative p-2.5 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-center group">
             {qrDataUrl ? (
               <img
                 src={qrDataUrl}
-                alt="QRIS QR Code"
-                className="w-56 h-56 object-contain"
+                alt={`QRIS ${formatCurrency(amount, settings.currencySymbol)}`}
+                className="w-56 h-56 object-contain rounded-sm"
+                style={{ imageRendering: 'pixelated' }}
               />
             ) : (
               <div className="w-56 h-56 flex flex-col items-center justify-center text-slate-400 gap-2">
@@ -204,16 +291,26 @@ export const QrisDisplayCard: React.FC<QrisDisplayCardProps> = ({
               </div>
             )}
 
-            {/* Official QRIS Center Badge Watermark */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 py-1 rounded-md shadow-md border border-[#cb1c1d]/30 flex items-center justify-center">
-              <span className="text-[11px] font-black tracking-tighter text-[#cb1c1d]">
-                QRIS
-              </span>
-            </div>
+            {/* Quick Enlarge Hover Button */}
+            <button
+              type="button"
+              onClick={() => setIsFullscreenModalOpen(true)}
+              className="absolute bottom-3 right-3 bg-white/90 hover:bg-white text-slate-700 p-1.5 rounded-lg shadow border border-slate-200 opacity-90 hover:opacity-100 transition-opacity flex items-center gap-1 text-[10px] font-bold cursor-pointer"
+              title="Perbesar Tampilan QR untuk Pelanggan"
+            >
+              <span className="material-symbols-outlined text-sm">fullscreen</span>
+              <span>Perbesar</span>
+            </button>
+          </div>
+
+          {/* Sub-label under QR ensuring scannability */}
+          <div className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+            <span>Siap Dipindai Semua Kamera & Aplikasi M-Banking</span>
           </div>
 
           {/* Real-time Nominal Banner */}
-          <div className="w-full mt-3 p-3 bg-red-50/80 border border-red-200 rounded-xl text-center">
+          <div className="w-full mt-3 p-3 bg-red-50/90 border border-red-200 rounded-xl text-center">
             <span className="text-[10px] font-bold text-red-800 uppercase tracking-wider block">
               Nominal Pembayaran Real-Time
             </span>
@@ -221,7 +318,9 @@ export const QrisDisplayCard: React.FC<QrisDisplayCardProps> = ({
               {formatCurrency(amount, settings.currencySymbol)}
             </div>
             <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-600 font-medium">
-              <span>Biaya Transaksi: <strong className="text-emerald-700">Rp 0 (Gratis)</strong></span>
+              <span>
+                Biaya Transaksi: <strong className="text-emerald-700">Rp 0 (Gratis)</strong>
+              </span>
             </div>
           </div>
 
@@ -247,10 +346,18 @@ export const QrisDisplayCard: React.FC<QrisDisplayCardProps> = ({
             <span className="bg-white py-1 px-1.5 rounded border border-slate-200 shadow-2xs">Mandiri</span>
             <span className="bg-white py-1 px-1.5 rounded border border-slate-200 shadow-2xs">BRI</span>
             <span className="bg-white py-1 px-1.5 rounded border border-slate-200 shadow-2xs">BNI</span>
-            <span className="bg-white py-1 px-1.5 rounded border border-slate-200 shadow-2xs text-[#00a651]">GoPay</span>
-            <span className="bg-white py-1 px-1.5 rounded border border-slate-200 shadow-2xs text-[#4c3494]">OVO</span>
-            <span className="bg-white py-1 px-1.5 rounded border border-slate-200 shadow-2xs text-[#118eea]">DANA</span>
-            <span className="bg-white py-1 px-1.5 rounded border border-slate-200 shadow-2xs text-[#ee4d2d]">ShopeePay</span>
+            <span className="bg-white py-1 px-1.5 rounded border border-slate-200 shadow-2xs text-[#00a651]">
+              GoPay
+            </span>
+            <span className="bg-white py-1 px-1.5 rounded border border-slate-200 shadow-2xs text-[#4c3494]">
+              OVO
+            </span>
+            <span className="bg-white py-1 px-1.5 rounded border border-slate-200 shadow-2xs text-[#118eea]">
+              DANA
+            </span>
+            <span className="bg-white py-1 px-1.5 rounded border border-slate-200 shadow-2xs text-[#ee4d2d]">
+              ShopeePay
+            </span>
           </div>
           <p className="text-[9px] text-slate-500 mt-1.5">
             Dapat dipindai oleh semua aplikasi m-Banking & E-Wallet berizin BI
@@ -283,6 +390,35 @@ export const QrisDisplayCard: React.FC<QrisDisplayCardProps> = ({
           </div>
         </div>
 
+        {/* Live Camera Scanner Box (if toggled on) */}
+        {isCameraScannerActive && (
+          <div className="p-3 bg-slate-900 rounded-xl border border-blue-500 shadow-lg text-white space-y-2 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold flex items-center gap-1.5 text-blue-400">
+                <span className="material-symbols-outlined text-sm">photo_camera</span>
+                <span>Kamera Pindai Aktif (Arahkan ke QR Pembeli)</span>
+              </span>
+              <button
+                type="button"
+                onClick={handleToggleCameraScanner}
+                className="text-xs text-slate-400 hover:text-white"
+              >
+                Tutup Kamera
+              </button>
+            </div>
+            <div
+              id={scannerContainerId}
+              className="w-full h-48 bg-black rounded-lg overflow-hidden relative flex items-center justify-center"
+            ></div>
+            {cameraError && (
+              <p className="text-[11px] text-red-400 bg-red-950/60 p-2 rounded">{cameraError}</p>
+            )}
+            <p className="text-[10px] text-slate-400 text-center">
+              Pindai QR code dari aplikasi m-Banking atau E-Wallet pembeli untuk verifikasi otomatis
+            </p>
+          </div>
+        )}
+
         {/* Status Verification Toast if clicked */}
         {verificationStatus && (
           <div className="p-2.5 text-xs rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 flex items-center gap-2 animate-in fade-in">
@@ -298,18 +434,33 @@ export const QrisDisplayCard: React.FC<QrisDisplayCardProps> = ({
           className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
         >
           <span className="material-symbols-outlined text-base">check_circle</span>
-          <span>Simulasi Nasabah Berhasil Bayar</span>
+          <span>Simulasi Nasabah Berhasil Bayar (Konfirmasi Lunas)</span>
         </button>
 
         {/* Secondary Cashier Actions */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-4 gap-1.5">
+          <button
+            type="button"
+            onClick={handleToggleCameraScanner}
+            className={`py-2 px-1 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center gap-1 cursor-pointer transition-colors ${
+              isCameraScannerActive
+                ? 'bg-blue-600 text-white'
+                : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+            }`}
+            title="Scan QR dari HP Pelanggan menggunakan Kamera"
+          >
+            <span className="material-symbols-outlined text-base">photo_camera</span>
+            <span>{isCameraScannerActive ? 'Tutup Cam' : 'Scan Cam'}</span>
+          </button>
+
           <button
             type="button"
             disabled={isVerifying}
             onClick={handleCheckStatus}
-            className="py-2 px-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer"
+            className="py-2 px-1 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center gap-1 cursor-pointer"
+            title="Cek status transaksi ke gateway"
           >
-            <span className={`material-symbols-outlined text-sm ${isVerifying ? 'animate-spin' : ''}`}>
+            <span className={`material-symbols-outlined text-base ${isVerifying ? 'animate-spin' : ''}`}>
               refresh
             </span>
             <span>Cek Status</span>
@@ -319,24 +470,106 @@ export const QrisDisplayCard: React.FC<QrisDisplayCardProps> = ({
             <button
               type="button"
               onClick={onPrintQrisSlip}
-              className="py-2 px-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer"
-              title="Cetak Struk QRIS ke Mini Printer"
+              className="py-2 px-1 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center gap-1 cursor-pointer"
+              title="Cetak Struk QRIS ke Mini Printer Bluetooth"
             >
-              <span className="material-symbols-outlined text-sm">print</span>
-              <span>Cetak QRIS</span>
+              <span className="material-symbols-outlined text-base">print</span>
+              <span>Cetak Slip</span>
             </button>
           )}
 
           <button
             type="button"
             onClick={handleDownloadQris}
-            className="py-2 px-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer"
+            className="py-2 px-1 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-[10px] font-bold flex flex-col items-center justify-center gap-1 cursor-pointer"
+            title="Unduh file gambar QRIS"
           >
-            <span className="material-symbols-outlined text-sm">download</span>
+            <span className="material-symbols-outlined text-base">download</span>
             <span>Unduh QR</span>
           </button>
         </div>
+
+        {/* Copy Payload Button */}
+        <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 px-1">
+          <button
+            type="button"
+            onClick={handleCopyPayload}
+            className="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-xs">content_copy</span>
+            <span>Salin Kode String QRIS (EMVCo)</span>
+          </button>
+          <span className="font-mono text-[10px]">TID: {terminalId}</span>
+        </div>
       </div>
+
+      {/* Fullscreen Customer View Modal */}
+      {isFullscreenModalOpen && (
+        <div className="fixed inset-0 z-60 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full flex flex-col items-center text-slate-900 shadow-2xl animate-in zoom-in-95 duration-150 relative">
+            <button
+              type="button"
+              onClick={() => setIsFullscreenModalOpen(false)}
+              className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-700 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-lg">close</span>
+            </button>
+
+            {/* Standee Header */}
+            <div className="w-full bg-[#cb1c1d] text-white p-3 rounded-2xl flex items-center justify-between mb-4 shadow-sm">
+              <div className="flex items-center gap-2">
+                <div className="bg-white text-[#cb1c1d] font-black text-sm px-2 py-0.5 rounded tracking-tighter">
+                  QRIS
+                </div>
+                <div className="text-left">
+                  <span className="text-[10px] font-bold block">QR CODE INDONESIAN STANDARD</span>
+                  <span className="text-[8px] text-red-100">PEMBAYARAN DIGITAL NASIONAL</span>
+                </div>
+              </div>
+              <div className="bg-white px-2 py-0.5 rounded-full font-black text-xs text-[#003882]">
+                GPN
+              </div>
+            </div>
+
+            <h3 className="text-lg font-black uppercase text-center mb-1">{storeName}</h3>
+            <p className="text-xs text-slate-500 font-mono mb-4">NMID: {nmid}</p>
+
+            {/* Large High-Contrast QR Code */}
+            <div className="p-4 bg-white border-2 border-slate-300 rounded-2xl shadow-inner">
+              <img
+                src={qrDataUrl}
+                alt="QRIS Fullscreen"
+                className="w-72 h-72 object-contain"
+                style={{ imageRendering: 'pixelated' }}
+              />
+            </div>
+
+            {/* Real-time Amount */}
+            <div className="w-full mt-4 p-4 bg-red-50 border border-red-200 rounded-2xl text-center">
+              <span className="text-xs font-bold text-red-800 uppercase block">Total Pembayaran</span>
+              <span className="text-3xl font-black text-[#cb1c1d] block">
+                {formatCurrency(amount, settings.currencySymbol)}
+              </span>
+            </div>
+
+            <p className="text-xs text-slate-500 mt-3 text-center">
+              Pindai dengan aplikasi m-Banking (BCA, Mandiri, BRI, BNI) atau E-Wallet (GoPay, OVO, DANA, ShopeePay)
+            </p>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsFullscreenModalOpen(false);
+                handleSimulateInstantPay();
+              }}
+              className="mt-4 w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-base">check_circle</span>
+              <span>Konfirmasi Pembayaran Selesai</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

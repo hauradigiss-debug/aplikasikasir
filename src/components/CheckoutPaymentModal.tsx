@@ -550,35 +550,33 @@ export const CheckoutPaymentModal: React.FC<CheckoutPaymentModalProps> = ({
                 customerName={customerName}
                 onPaymentSuccess={handleQrisPaymentSuccess}
                 onPrintQrisSlip={() => {
-                  if (config.autoPrintOnCheckout) {
-                    printReceipt(
-                      {
-                        id: `ord-qris-${Date.now()}`,
-                        receiptNumber,
-                        items: cart,
-                        subtotal,
-                        discount: discountAmount,
-                        tax: taxAmount,
-                        total: grandTotal,
-                        paymentMethod: 'qris',
-                        amountPaid: grandTotal,
-                        change: 0,
-                        cashierName: currentUser?.fullName || 'Staff POS',
-                        customerName,
-                        timestamp: new Date().toISOString(),
-                        status: 'completed',
-                        qrisDetails: {
-                          nmid: settings.qrisNmid || 'ID1020038291039',
-                          terminalId: settings.qrisTerminalId || 'A01',
-                          referenceNumber: 'RRN' + Date.now().toString().slice(-8),
-                          issuer: 'QRIS Real-Time',
-                        },
+                  printReceipt(
+                    {
+                      id: `ord-qris-${Date.now()}`,
+                      receiptNumber,
+                      items: cart,
+                      subtotal,
+                      discount: discountAmount,
+                      tax: taxAmount,
+                      total: grandTotal,
+                      paymentMethod: 'qris',
+                      amountPaid: grandTotal,
+                      change: 0,
+                      cashierName: currentUser?.fullName || 'Staff POS',
+                      customerName,
+                      timestamp: new Date().toISOString(),
+                      status: 'completed',
+                      qrisDetails: {
+                        nmid: settings.qrisNmid || 'ID1020038291039',
+                        terminalId: settings.qrisTerminalId || 'A01',
+                        referenceNumber: 'RRN' + Date.now().toString().slice(-8),
+                        issuer: 'QRIS Real-Time',
                       },
-                      settings
-                    );
-                  } else {
-                    alert('Printer Mini siap! Cetak slip QRIS dapat dilakukan saat printer terhubung.');
-                  }
+                    },
+                    settings
+                  ).catch((err) => {
+                    console.warn('Print slip failed or printer not connected:', err);
+                  });
                 }}
               />
             </div>
