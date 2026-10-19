@@ -225,19 +225,19 @@ export const ProductModal: React.FC<ProductModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-[#0b1c30] dark:text-slate-200 uppercase tracking-wider mb-1.5">
-                Retail Price ($) *
+                Harga Jual (Rp) *
               </label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#757682] dark:text-slate-400 font-bold text-sm">$</span>
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#757682] dark:text-slate-400 font-bold text-xs">Rp</span>
                 <input
                   type="number"
-                  step="0.01"
+                  step="any"
                   min="0"
                   required
                   value={price}
                   onChange={(e) => setPrice(e.target.value === '' ? '' : Number(e.target.value))}
-                  placeholder="0.00"
-                  className="w-full h-11 pl-8 pr-3.5 bg-[#f8f9ff] dark:bg-slate-800 border border-[#c5c5d3] dark:border-slate-700 rounded-lg text-sm font-semibold text-[#0b1c30] dark:text-slate-100 focus:border-[#00236f] dark:focus:border-blue-500 outline-none"
+                  placeholder="0"
+                  className="w-full h-11 pl-10 pr-3.5 bg-[#f8f9ff] dark:bg-slate-800 border border-[#c5c5d3] dark:border-slate-700 rounded-lg text-sm font-semibold text-[#0b1c30] dark:text-slate-100 focus:border-[#00236f] dark:focus:border-blue-500 outline-none"
                 />
               </div>
               {errors.price && <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.price}</p>}
@@ -245,18 +245,18 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
             <div>
               <label className="block text-xs font-bold text-[#0b1c30] dark:text-slate-200 uppercase tracking-wider mb-1.5">
-                Cost Price ($)
+                Harga Modal (Rp)
               </label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#757682] dark:text-slate-400 font-bold text-sm">$</span>
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#757682] dark:text-slate-400 font-bold text-xs">Rp</span>
                 <input
                   type="number"
-                  step="0.01"
+                  step="any"
                   min="0"
                   value={costPrice}
                   onChange={(e) => setCostPrice(e.target.value === '' ? '' : Number(e.target.value))}
-                  placeholder="0.00"
-                  className="w-full h-11 pl-8 pr-3.5 bg-[#f8f9ff] dark:bg-slate-800 border border-[#c5c5d3] dark:border-slate-700 rounded-lg text-sm text-[#0b1c30] dark:text-slate-100 focus:border-[#00236f] dark:focus:border-blue-500 outline-none"
+                  placeholder="0"
+                  className="w-full h-11 pl-10 pr-3.5 bg-[#f8f9ff] dark:bg-slate-800 border border-[#c5c5d3] dark:border-slate-700 rounded-lg text-sm text-[#0b1c30] dark:text-slate-100 focus:border-[#00236f] dark:focus:border-blue-500 outline-none"
                 />
               </div>
             </div>

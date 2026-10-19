@@ -59,7 +59,15 @@ export const playSound = (type: 'beep' | 'success' | 'delete' | 'error') => {
   }
 };
 
-export const formatCurrency = (amount: number, symbol = '$'): string => {
+export const formatCurrency = (amount: number, symbol = 'Rp'): string => {
+  if (!symbol) return amount.toLocaleString();
+  const isRupiah = symbol.toLowerCase().includes('rp');
+  if (isRupiah) {
+    const formatted = Math.abs(amount) % 1 === 0
+      ? amount.toLocaleString('id-ID')
+      : amount.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return `${symbol} ${formatted}`.replace(/\s+/g, ' ');
+  }
   return `${symbol}${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 

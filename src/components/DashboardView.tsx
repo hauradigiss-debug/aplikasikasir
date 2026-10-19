@@ -43,9 +43,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const categorySalesList = Object.entries(categorySalesMap).sort((a, b) => b[1] - a[1]);
   const maxCategorySales = categorySalesList.length > 0 ? Math.max(...categorySalesList.map((c) => c[1])) : 1;
 
-  // Mock 7-day sales breakdown
-  const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const daySales = [184.5, 240.0, 195.8, 310.2, 425.0, 580.4, totalRevenue || 340.0];
+  // 7-day sales breakdown
+  const isRupiah = settings.currencySymbol.toLowerCase().includes('rp');
+  const daysOfWeek = isRupiah ? ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const daySales = isRupiah
+    ? [1850000, 2400000, 1950000, 3100000, 4250000, 5800000, totalRevenue || 3400000]
+    : [184.5, 240.0, 195.8, 310.2, 425.0, 580.4, totalRevenue || 340.0];
   const maxDaySale = Math.max(...daySales);
 
   return (
@@ -174,8 +177,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
               return (
                 <div key={day} className="flex-1 flex flex-col items-center gap-2 group">
-                  <span className="text-[11px] font-bold text-[#00236f] dark:text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity">
-                    ${Math.round(val)}
+                  <span className="text-[10px] font-bold text-[#00236f] dark:text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity truncate max-w-[55px] text-center">
+                    {formatCurrency(Math.round(val), settings.currencySymbol)}
                   </span>
                   <div className="w-full max-w-[38px] bg-[#eff4ff] dark:bg-slate-800 rounded-t-lg relative flex items-end h-32 overflow-hidden">
                     <div

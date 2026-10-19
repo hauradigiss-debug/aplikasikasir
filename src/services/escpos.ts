@@ -297,11 +297,31 @@ export function generateReceiptEscPos(
   builder.divider('-');
 
   // Payment Breakdown
-  builder.twoColumns('Tunai/Diterima', formatCurrency(order.amountPaid, settings.currencySymbol));
   if (order.paymentMethod === 'cash') {
+    builder.twoColumns('Tunai Diterima', formatCurrency(order.amountPaid, settings.currencySymbol));
     builder.bold(true);
     builder.twoColumns('Kembali', formatCurrency(order.change, settings.currencySymbol));
     builder.bold(false);
+  } else if (order.paymentMethod === 'qris') {
+    builder.twoColumns('Metode Pembayaran', 'QRIS DINAMIS');
+    builder.twoColumns('Status Verifikasi', 'LUNAS (OK)');
+    if (order.qrisDetails?.nmid) {
+      builder.twoColumns('NMID Merchant', order.qrisDetails.nmid);
+    }
+    if (order.qrisDetails?.referenceNumber) {
+      builder.twoColumns('No. Ref / RRN', order.qrisDetails.referenceNumber);
+    }
+    if (order.qrisDetails?.issuer) {
+      builder.twoColumns('Aplikasi Bayar', order.qrisDetails.issuer);
+    }
+  } else if (order.paymentMethod === 'card') {
+    builder.twoColumns('Metode Pembayaran', `CARD (${order.cardDetails?.bank || 'EDC'})`);
+    if (order.cardDetails?.approvalCode) {
+      builder.twoColumns('Approval Code', order.cardDetails.approvalCode);
+    }
+    if (order.cardDetails?.last4Digits) {
+      builder.twoColumns('Nomor Kartu', `**** ${order.cardDetails.last4Digits}`);
+    }
   }
 
   builder.divider('-');

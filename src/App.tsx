@@ -58,20 +58,64 @@ export default function App() {
     return null;
   });
 
-  // Load state from localStorage or initial seed
+  // Load state from localStorage or initial seed (with automatic Rupiah migration)
   const [products, setProducts] = useState<Product[]>(() => {
     const saved = localStorage.getItem('stationery_pos_products');
-    return saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
+    if (saved) {
+      try {
+        const parsed: Product[] = JSON.parse(saved);
+        // If prices are in dollar format (all prices < 1000), update to Rupiah
+        const hasDollarPrices = parsed.length > 0 && parsed.every((p) => p.price < 1000);
+        if (hasDollarPrices) {
+          localStorage.setItem('stationery_pos_products', JSON.stringify(INITIAL_PRODUCTS));
+          return INITIAL_PRODUCTS;
+        }
+        return parsed;
+      } catch {
+        return INITIAL_PRODUCTS;
+      }
+    }
+    return INITIAL_PRODUCTS;
   });
 
   const [orders, setOrders] = useState<Order[]>(() => {
     const saved = localStorage.getItem('stationery_pos_orders');
-    return saved ? JSON.parse(saved) : INITIAL_ORDERS;
+    if (saved) {
+      try {
+        const parsed: Order[] = JSON.parse(saved);
+        const hasDollarOrders = parsed.length > 0 && parsed.every((o) => o.total < 1000);
+        if (hasDollarOrders) {
+          localStorage.setItem('stationery_pos_orders', JSON.stringify(INITIAL_ORDERS));
+          return INITIAL_ORDERS;
+        }
+        return parsed;
+      } catch {
+        return INITIAL_ORDERS;
+      }
+    }
+    return INITIAL_ORDERS;
   });
 
   const [settings, setSettings] = useState<StoreSettings>(() => {
     const saved = localStorage.getItem('stationery_pos_settings');
-    return saved ? JSON.parse(saved) : INITIAL_SETTINGS;
+    if (saved) {
+      try {
+        const parsed: StoreSettings = JSON.parse(saved);
+        if (parsed.currencySymbol === '$') {
+          parsed.currencySymbol = 'Rp';
+          parsed.storeName = parsed.storeName || INITIAL_SETTINGS.storeName;
+          parsed.tagline = parsed.tagline || INITIAL_SETTINGS.tagline;
+          parsed.address = parsed.address || INITIAL_SETTINGS.address;
+          parsed.phone = parsed.phone || INITIAL_SETTINGS.phone;
+          parsed.taxRate = 0.11;
+          localStorage.setItem('stationery_pos_settings', JSON.stringify(parsed));
+        }
+        return parsed;
+      } catch {
+        return INITIAL_SETTINGS;
+      }
+    }
+    return INITIAL_SETTINGS;
   });
 
   const [categories, setCategories] = useState<CategoryType[]>(() => {

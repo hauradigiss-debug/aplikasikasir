@@ -3,6 +3,7 @@ import confetti from 'canvas-confetti';
 import { Product, CartItem, Order, StoreSettings, PaymentMethod, CategoryType, User, Member } from '../types';
 import { formatCurrency, generateReceiptNumber, playSound } from '../utils';
 import { BarcodeScannerModal } from './BarcodeScannerModal';
+import { CheckoutPaymentModal } from './CheckoutPaymentModal';
 import { usePrinter } from '../context/PrinterContext';
 import { PrinterStatusPill } from './PrinterStatusPill';
 
@@ -742,186 +743,49 @@ export const CashierView: React.FC<CashierViewProps> = ({
         </div>
       </div>
 
-      {/* Payment & Checkout Modal */}
-      {isCheckoutOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl border border-[#c5c5d3]/50 dark:border-slate-800 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 transition-colors">
-            {/* Header */}
-            <div className="p-5 border-b border-[#e5eeff] dark:border-slate-800 bg-[#f8f9ff] dark:bg-slate-850 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#00236f] dark:bg-blue-600 text-white flex items-center justify-center">
-                  <span className="material-symbols-outlined">point_of_sale</span>
-                </div>
-                <div>
-                  <h3 className="font-bold text-base text-[#00236f] dark:text-blue-300">Complete Payment</h3>
-                  <p className="text-xs text-[#757682] dark:text-slate-400">Choose payment method and confirm tender</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsCheckoutOpen(false)}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-[#757682] dark:text-slate-400 hover:bg-[#e5eeff] dark:hover:bg-slate-800 cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-lg">close</span>
-              </button>
-            </div>
+      {/* Comprehensive Enterprise Payment & Checkout Modal */}
+      <CheckoutPaymentModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        cart={cart}
+        subtotal={subtotal}
+        discountAmount={discountAmount}
+        discountPercent={discountPercent}
+        taxAmount={taxAmount}
+        grandTotal={grandTotal}
+        customerName={customerName}
+        selectedMember={selectedMember}
+        currentUser={currentUser}
+        settings={settings}
+        onCompleteSale={(order) => {
+          onCompleteSale(order);
+          if (settings.enableSound) playSound('success');
 
-            <div className="p-6 space-y-5">
-              {/* Grand Total banner */}
-              <div className="p-4 bg-[#eff4ff] dark:bg-blue-950/40 border border-[#d3e4fe] dark:border-blue-900/60 rounded-xl flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-semibold text-[#757682] dark:text-slate-400 uppercase">Total Due</p>
-                  <p className="text-3xl font-black text-[#00236f] dark:text-blue-300">
-                    {formatCurrency(grandTotal, settings.currencySymbol)}
-                  </p>
-                </div>
-                <div className="text-right text-xs text-[#444651] dark:text-slate-300">
-                  <p>{cart.reduce((s, i) => s + i.quantity, 0)} items</p>
-                  <p className="font-semibold text-[#00236f] dark:text-blue-300">
-                    {customerName || 'Walk-in Customer'}
-                  </p>
-                </div>
-              </div>
+          // Award loyalty points to member if attached
+          if (selectedMember && onMemberPointEarned) {
+            const earned = Math.max(1, Math.floor(grandTotal));
+            onMemberPointEarned(selectedMember.id, earned);
+          }
 
-              {/* Payment Method Selector */}
-              <div>
-                <label className="block text-xs font-bold text-[#0b1c30] dark:text-slate-200 uppercase mb-2">
-                  Payment Method
-                </label>
-                <div className="grid grid-cols-3 gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('cash')}
-                    className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                      paymentMethod === 'cash'
-                        ? 'border-[#00236f] dark:border-blue-500 bg-[#eff4ff] dark:bg-blue-950/60 text-[#00236f] dark:text-blue-300 font-bold shadow-xs'
-                        : 'border-[#c5c5d3] dark:border-slate-700 text-[#444651] dark:text-slate-300 hover:bg-[#f8f9ff] dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-2xl">payments</span>
-                    <span className="text-xs">Cash</span>
-                  </button>
+          // Confetti celebration
+          try {
+            confetti({
+              particleCount: 80,
+              spread: 60,
+              origin: { y: 0.8 },
+            });
+          } catch {
+            // Ignore confetti
+          }
 
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('card')}
-                    className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                      paymentMethod === 'card'
-                        ? 'border-[#00236f] dark:border-blue-500 bg-[#eff4ff] dark:bg-blue-950/60 text-[#00236f] dark:text-blue-300 font-bold shadow-xs'
-                        : 'border-[#c5c5d3] dark:border-slate-700 text-[#444651] dark:text-slate-300 hover:bg-[#f8f9ff] dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-2xl">credit_card</span>
-                    <span className="text-xs">Card / Terminal</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('qris')}
-                    className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                      paymentMethod === 'qris'
-                        ? 'border-[#00236f] dark:border-blue-500 bg-[#eff4ff] dark:bg-blue-950/60 text-[#00236f] dark:text-blue-300 font-bold shadow-xs'
-                        : 'border-[#c5c5d3] dark:border-slate-700 text-[#444651] dark:text-slate-300 hover:bg-[#f8f9ff] dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-2xl">qr_code_scanner</span>
-                    <span className="text-xs">QRIS / Digital</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Cash Tendered & Quick Denominations */}
-              {paymentMethod === 'cash' && (
-                <div className="space-y-3 animate-in fade-in duration-100">
-                  <div>
-                    <label className="block text-xs font-bold text-[#0b1c30] dark:text-slate-200 uppercase mb-1">
-                      Cash Received ({settings.currencySymbol})
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-[#757682] dark:text-slate-400">{settings.currencySymbol}</span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min={grandTotal}
-                        value={cashTendered}
-                        onChange={(e) => setCashTendered(e.target.value === '' ? '' : Number(e.target.value))}
-                        className="w-full h-12 pl-8 pr-4 bg-[#f8f9ff] dark:bg-slate-800 border border-[#c5c5d3] dark:border-slate-700 rounded-lg text-xl font-bold text-[#00236f] dark:text-blue-300 focus:border-[#00236f] outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Quick Cash Buttons */}
-                  <div className="flex gap-2 flex-wrap">
-                    <button
-                      type="button"
-                      onClick={() => setCashTendered(grandTotal)}
-                      className="px-3 py-1.5 bg-[#f8f9ff] dark:bg-slate-800 hover:bg-[#d3e4fe] dark:hover:bg-slate-700 border border-[#c5c5d3] dark:border-slate-700 rounded-md text-xs font-semibold text-[#00236f] dark:text-blue-300 cursor-pointer"
-                    >
-                      Exact ({formatCurrency(grandTotal, settings.currencySymbol)})
-                    </button>
-                    {[10, 20, 50, 100].map((note) => {
-                      if (note < grandTotal && note * 2 < grandTotal) return null;
-                      return (
-                        <button
-                          key={note}
-                          type="button"
-                          onClick={() => setCashTendered(note)}
-                          className="px-3 py-1.5 bg-[#f8f9ff] dark:bg-slate-800 hover:bg-[#d3e4fe] dark:hover:bg-slate-700 border border-[#c5c5d3] dark:border-slate-700 rounded-md text-xs font-semibold text-[#00236f] dark:text-blue-300 cursor-pointer"
-                        >
-                          ${note}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Change due preview */}
-                  <div className="p-3 bg-[#e6f4ea] dark:bg-emerald-950/60 border border-[#137333]/30 dark:border-emerald-800 rounded-xl flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#137333] dark:text-emerald-300 uppercase">Change Due</span>
-                    <span className="text-xl font-bold text-[#137333] dark:text-emerald-300">
-                      {formatCurrency(
-                        Math.max(0, (Number(cashTendered) || 0) - grandTotal),
-                        settings.currencySymbol
-                      )}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {/* Digital payment simulation note */}
-              {paymentMethod !== 'cash' && (
-                <div className="p-4 bg-[#f8f9ff] dark:bg-slate-800 border border-[#d3e4fe] dark:border-slate-700 rounded-xl flex items-center gap-3">
-                  <span className="material-symbols-outlined text-2xl text-[#00236f] dark:text-blue-400">contactless</span>
-                  <div>
-                    <p className="text-xs font-bold text-[#00236f] dark:text-blue-300">Ready for Customer Tap / Scan</p>
-                    <p className="text-[11px] text-[#757682] dark:text-slate-400">
-                      Card terminal authorized. Click Confirm to finalize receipt.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Modal Actions */}
-            <div className="p-5 border-t border-[#e5eeff] dark:border-slate-800 bg-[#f8f9ff] dark:bg-slate-850 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setIsCheckoutOpen(false)}
-                className="px-5 h-11 text-xs font-semibold text-[#444651] dark:text-slate-300 hover:bg-[#e5eeff] dark:hover:bg-slate-800 rounded-full cursor-pointer"
-              >
-                Back to Basket
-              </button>
-              <button
-                type="button"
-                disabled={paymentMethod === 'cash' && (Number(cashTendered) || 0) < grandTotal}
-                onClick={handleFinalizeSale}
-                className="px-8 h-12 bg-[#00236f] dark:bg-blue-600 hover:bg-[#1e3a8a] dark:hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-slate-800 text-white font-bold text-sm rounded-full shadow-md flex items-center gap-2 cursor-pointer transition-all active:scale-95"
-              >
-                <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                Confirm & Print Receipt
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          setIsCheckoutOpen(false);
+          setCart([]);
+          setCustomerName('');
+          setSelectedMember(null);
+          setDiscountPercent(0);
+        }}
+        onOpenReceipt={onOpenReceipt}
+      />
 
       {/* Barcode Camera & USB Scanner Modal */}
       <BarcodeScannerModal

@@ -28,6 +28,7 @@ export interface VirtualReceiptLog {
 
 interface PrinterContextType {
   status: PrinterConnectionStatus;
+  isConnected: boolean;
   device: BluetoothDeviceInfo | null;
   config: BluetoothPrinterConfig;
   isSupported: boolean;
@@ -318,6 +319,7 @@ export const PrinterProvider: React.FC<{ children: React.ReactNode }> = ({ child
     <PrinterContext.Provider
       value={{
         status,
+        isConnected: status === 'connected',
         device,
         config,
         isSupported,

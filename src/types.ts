@@ -69,6 +69,18 @@ export interface Order {
   customerName?: string;
   timestamp: string;
   status: 'completed' | 'refunded' | 'voided';
+  cardDetails?: {
+    bank: string;
+    approvalCode: string;
+    cardType?: 'debit' | 'credit';
+    last4Digits?: string;
+  };
+  qrisDetails?: {
+    nmid: string;
+    terminalId: string;
+    referenceNumber: string;
+    issuer?: string;
+  };
 }
 
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -100,6 +112,8 @@ export interface StoreSettings {
   enableSound: boolean;
   themeMode?: ThemeMode;
   printerConfig?: BluetoothPrinterConfig;
+  qrisNmid?: string;
+  qrisTerminalId?: string;
 }
 
 export type NavigationTab = 'dashboard' | 'products' | 'cashier' | 'history' | 'categories' | 'members' | 'settings' | 'admin_security';

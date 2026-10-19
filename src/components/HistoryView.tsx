@@ -191,8 +191,16 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                     {ord.items.reduce((s, i) => s + i.quantity, 0)} units
                   </td>
                   <td className="py-3 px-4">
-                    <span className="uppercase text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-800 text-[#444651] dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                      {ord.paymentMethod}
+                    <span
+                      className={`uppercase text-[10px] font-bold px-2 py-0.5 rounded border inline-flex items-center gap-1 ${
+                        ord.paymentMethod === 'qris'
+                          ? 'bg-red-50 dark:bg-red-950 text-[#cb1c1d] dark:text-red-300 border-red-200 dark:border-red-900'
+                          : ord.paymentMethod === 'card'
+                          ? 'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900'
+                          : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900'
+                      }`}
+                    >
+                      {ord.paymentMethod === 'qris' ? 'QRIS GPN' : ord.paymentMethod === 'card' ? (ord.cardDetails?.bank ? `CARD • ${ord.cardDetails.bank}` : 'CARD') : 'TUNAI'}
                     </span>
                   </td>
                   <td className="py-3 px-4 text-right font-bold text-[#00236f] dark:text-blue-300">

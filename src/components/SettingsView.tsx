@@ -754,6 +754,58 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
         </div>
 
+        {/* QRIS Merchant & Bank Indonesia Standards */}
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-red-200 dark:border-red-950/60 shadow-xs space-y-4 transition-colors">
+          <div className="flex items-center justify-between pb-3 border-b border-red-100 dark:border-red-950/40">
+            <div>
+              <h3 className="text-base font-bold text-[#cb1c1d] dark:text-red-400 flex items-center gap-2">
+                <span className="material-symbols-outlined">qr_code_scanner</span>
+                Pengaturan QRIS Standar Bank Indonesia & GPN
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Konfigurasi National Merchant ID (NMID) dan Terminal ID untuk pembuatan kode QRIS dinamis real-time.
+              </p>
+            </div>
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-100 dark:bg-red-950 text-[#cb1c1d] dark:text-red-300 border border-red-300 dark:border-red-800">
+              SATU QRIS UNTUK SEMUA
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase mb-1.5">
+                National Merchant ID (NMID)
+              </label>
+              <input
+                type="text"
+                value={formData.qrisNmid || 'ID1020038291039'}
+                onChange={(e) => setFormData({ ...formData, qrisNmid: e.target.value })}
+                placeholder="Contoh: ID1020038291039"
+                className="w-full h-11 px-3.5 bg-red-50/40 dark:bg-slate-800/80 border border-red-200 dark:border-slate-700 rounded-lg text-sm font-mono font-bold text-slate-900 dark:text-slate-100 focus:border-[#cb1c1d] outline-none"
+              />
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                Nomor identitas unik merchant terdaftar di PT Jalin Pembayaran Nusantara / BI.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-800 dark:text-slate-300 uppercase mb-1.5">
+                Kode Terminal / Kasir (Terminal ID)
+              </label>
+              <input
+                type="text"
+                value={formData.qrisTerminalId || 'A01'}
+                onChange={(e) => setFormData({ ...formData, qrisTerminalId: e.target.value })}
+                placeholder="Contoh: A01"
+                className="w-full h-11 px-3.5 bg-red-50/40 dark:bg-slate-800/80 border border-red-200 dark:border-slate-700 rounded-lg text-sm font-mono font-bold text-slate-900 dark:text-slate-100 focus:border-[#cb1c1d] outline-none"
+              />
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                Identitas register kasir pada outlet (misal: A01, KSR01, KASIR-1).
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Audio & Feedback */}
         <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-[#c5c5d3]/60 dark:border-slate-800 shadow-xs flex items-center justify-between transition-colors">
           <div>

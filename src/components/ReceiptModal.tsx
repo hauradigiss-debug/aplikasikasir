@@ -113,8 +113,46 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               )}
               <div className="flex justify-between">
                 <span>Payment:</span>
-                <span className="uppercase font-bold text-[#00236f]">{order.paymentMethod}</span>
+                <span className="uppercase font-bold text-[#00236f]">
+                  {order.paymentMethod === 'qris'
+                    ? 'QRIS DINAMIS'
+                    : order.paymentMethod === 'card'
+                    ? `CARD (${order.cardDetails?.bank || 'EDC'})`
+                    : 'TUNAI (CASH)'}
+                </span>
               </div>
+              {order.paymentMethod === 'qris' && order.qrisDetails && (
+                <div className="bg-red-50 p-1.5 rounded border border-red-200 text-[10px] space-y-0.5 text-slate-700 mt-1">
+                  <div className="flex justify-between font-mono">
+                    <span>NMID:</span>
+                    <span className="font-bold">{order.qrisDetails.nmid}</span>
+                  </div>
+                  <div className="flex justify-between font-mono">
+                    <span>RRN / Ref:</span>
+                    <span className="font-bold">{order.qrisDetails.referenceNumber}</span>
+                  </div>
+                  {order.qrisDetails.issuer && (
+                    <div className="flex justify-between font-mono">
+                      <span>Sumber Dana:</span>
+                      <span className="font-bold text-[#cb1c1d]">{order.qrisDetails.issuer}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              {order.paymentMethod === 'card' && order.cardDetails && (
+                <div className="bg-blue-50 p-1.5 rounded border border-blue-200 text-[10px] space-y-0.5 text-slate-700 mt-1">
+                  <div className="flex justify-between font-mono">
+                    <span>Approval Code:</span>
+                    <span className="font-bold">{order.cardDetails.approvalCode}</span>
+                  </div>
+                  {order.cardDetails.last4Digits && (
+                    <div className="flex justify-between font-mono">
+                      <span>No. Kartu:</span>
+                      <span className="font-bold">**** **** **** {order.cardDetails.last4Digits}</span>
+                    </div>
+                  )}
+                </div>
+              )}
               {order.status === 'refunded' && (
                 <div className="p-1 bg-red-100 text-red-700 text-center font-bold uppercase rounded mt-1">
                   *** REFUNDED TRANSACTION ***
